@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="图床">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+<title>我的 GitHub 图床</title>
+<style>
+:root{
+  --primary:#8b5cf6; --primary-dark:#7c3aed; --pink:#ec4899;
+  --text:#1e1b4b; --muted:#6b7280; --border:#ede9fe;
+  --shadow:0 4px 24px rgba(139,92,246,.08);
+  --shadow-lg:0 16px 48px rgba(139,92,246,.18);
+  --grad:linear-gradient(135deg,#8b5cf6 0%,#ec4899 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:linear-gradient(160deg,#faf5ff 0%,#fdf2f8 50%,#f0f9ff 100%);
+  background-attachment:fixed;
+  color:var(--text); min-height:100vh;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+/* ===== 头部 ===== */
+.header{
+  background:linear-gradient(135deg,#7c3aed 0%,#db2777 100%);
+  color:#fff; padding:26px 28px; border-radius:0 0 24px 24px;
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:12px;
+  box-shadow:0 8px 32px rgba(124,58,237,.25);
+  position:relative; overflow:hidden;
+  padding-top:calc(26px + env(safe-area-inset-top));
+}
+.header::before{
+  content:''; position:absolute; top:-80px; right:-60px;
+  width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);
+}
+.header h1{font-size:1.35rem; font-weight:700; letter-spacing:.5px; position:relative}
+.header .sub{font-size:.8rem; opacity:.85; margin-top:2px; font-weight:400}
+/* ===== 按钮 ===== */
+.btn{
+  border:none; border-radius:12px; padding:10px 20px; font-size:.9rem;
+  cursor:pointer; transition:all .2s; font-weight:600; font-family:inherit;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-white{background:#fff; color:var(--primary-dark); box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.btn-grad{background:var(--grad); color:#fff; box-shadow:0 6px 18px rgba(139,92,246,.35)}
+.btn-grad:hover{box-shadow:0 8px 24px rgba(139,92,246,.45)}
+.btn-ghost{background:#f3f4f6; color:#4b5563}
+.btn-danger{background:#fef2f2; color:#dc2626}
+.btn-sm{padding:7px 14px; font-size:.8rem; border-radius:10px}
+.btn:disabled{opacity:.5; cursor:not-allowed; transform:none}
+/* ===== 布局 ===== */
+.container{max-width:1150px; margin:0 auto; padding:24px 20px 60px}
+.card{
+  background:#fff; border-radius:20px; box-shadow:var(--shadow);
+  padding:22px; margin-bottom:20px; border:1px solid rgba(139,92,246,.06);
+}
+.card h2{
+  font-size:.95rem; margin-bottom:16px; color:var(--text);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.card h2 .dot{width:8px; height:8px; border-radius:50%; background:var(--grad)}
+/* ===== Token ===== */
+.token-row{display:flex; gap:10px; flex-wrap:wrap}
+.token-row input{
+  flex:1; min-width:200px; padding:12px 16px; border:2px solid var(--border);
+  border-radius:12px; font-size:.9rem; outline:none; transition:border .2s; font-family:inherit;
+}
+.token-row input:focus{border-color:var(--primary)}
+/* ===== 上传区 ===== */
+.drop-zone{
+  border:2px dashed #d8ccf5; border-radius:18px; padding:40px 20px;
+  text-align:center; color:var(--muted); cursor:pointer;
+  transition:all .25s; background:linear-gradient(180deg,#fdfbff,#fff);
+  touch-action:manipulation;
+}
+.drop-zone:hover{border-color:var(--primary); background:#faf5ff}
+.drop-zone.dragover{border-color:var(--pink); background:#fdf2f8; color:var(--pink); transform:scale(1.01)}
+.drop-zone .icon{font-size:2rem; margin-bottom:8px; display:block}
+.drop-zone p{font-size:.95rem; font-weight:600; color:var(--text)}
+.drop-zone .hint{font-size:.78rem; margin-top:8px; color:#a8a3b8; font-weight:400}
+/* ===== 待上传列表 ===== */
+.pending-list{display:flex; flex-direction:column; gap:10px; margin-top:16px}
+.pending-item{
+  display:flex; align-items:center; gap:14px; padding:12px;
+  background:linear-gradient(135deg,#fdfbff,#fff); border:1px solid var(--border);
+  border-radius:14px; transition:all .2s;
+}
+.pending-item:hover{border-color:#d8ccf5; box-shadow:0 4px 16px rgba(139,92,246,.08)}
+.pending-thumb{
+  width:60px; height:60px; border-radius:10px; overflow:hidden;
+  background:#f3f0fa; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+}
+.pending-thumb img{width:100%; height:100%; object-fit:cover}
+.pending-meta{flex:1; min-width:0}
+.pending-name{font-size:.88rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.pending-size{font-size:.76rem; color:var(--muted); margin-top:3px}
+.pending-badge{
+  display:inline-block; font-size:.68rem; padding:2px 8px; border-radius:6px;
+  background:#ede9fe; color:var(--primary-dark); margin-left:6px; font-weight:600;
+}
+.pending-actions{display:flex; gap:8px; flex-shrink:0}
+/* ===== 进度 ===== */
+.progress-wrap{height:8px; background:#f3f0fa; border-radius:4px; margin-top:16px; overflow:hidden; display:none}
+.progress-bar{height:100%; width:0; background:var(--grad); border-radius:4px; transition:width .3s}
+/* ===== 图库 ===== */
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px}
+.item-card{
+  background:#fff; border-radius:18px; overflow:hidden; display:flex; flex-direction:column;
+  box-shadow:var(--shadow); border:1px solid rgba(139,92,246,.06); transition:all .25s;
+}
+.item-card:hover{transform:translateY(-3px); box-shadow:var(--shadow-lg)}
+.item-preview{
+  width:100%; height:170px; background:linear-gradient(135deg,#faf5ff,#fdf2f8);
+  display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;
+}
+.item-preview img{max-width:100%; max-height:100%; object-fit:contain; cursor:pointer; transition:transform .3s}
+.item-preview img:hover{transform:scale(1.04)}
+.item-preview audio{width:90%}
+.crop-hint{
+  position:absolute; top:10px; right:10px; background:rgba(139,92,246,.9); color:#fff;
+  font-size:.68rem; padding:4px 10px; border-radius:8px; opacity:0; transition:opacity .2s;
+  pointer-events:none; backdrop-filter:blur(4px);
+}
+.item-preview:hover .crop-hint{opacity:1}
+.item-body{padding:14px; display:flex; flex-direction:column; gap:10px}
+.item-name{font-size:.8rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.link-row{display:flex; gap:6px}
+.link-row input{
+  flex:1; min-width:0; padding:8px 10px; border:1px solid var(--border);
+  border-radius:9px; font-size:.72rem; color:#555; outline:none; font-family:inherit;
+}
+.action-row{display:flex; gap:6px; flex-wrap:wrap}
+/* ===== Toast ===== */
+.toast{
+  position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#1e1b4b; color:#fff; padding:14px 26px; border-radius:14px;
+  font-size:.9rem; opacity:0; pointer-events:none; transition:all .3s; z-index:99999;
+  max-width:90vw; box-shadow:0 12px 32px rgba(0,0,0,.25); font-weight:500;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.error{background:#dc2626}
+.toast.success{background:#10b981}
+/* ===== 空状态 ===== */
+.empty-tip{text-align:center; color:#c4bdd6; padding:50px 0; font-size:.9rem}
+.empty-tip .big{font-size:2.4rem; display:block; margin-bottom:10px}
+/* ===== 裁剪模态框 ===== */
+.crop-modal{
+  position:fixed; inset:0; background:rgba(15,10,35,.94); z-index:9999;
+  display:none; flex-direction:column; backdrop-filter:blur(8px);
+}
+.crop-modal.show{display:flex}
+.crop-header{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px 24px; color:#fff; border-bottom:1px solid rgba(255,255,255,.08);
+  padding-top:calc(16px + env(safe-area-inset-top));
+}
+.crop-header h3{font-size:1rem; font-weight:700}
+.crop-close{
+  background:rgba(255,255,255,.1); border:none; color:#fff; width:40px; height:40px;
+  border-radius:10px; cursor:pointer; font-size:1.1rem; transition:background .2s;
+}
+.crop-close:hover{background:rgba(255,255,255,.2)}
+.crop-stage{
+  flex:1; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;
+  touch-action:none;
+}
+#cropCanvas{position:absolute; top:0; left:0; pointer-events:none}
+.crop-box{
+  position:absolute; border:2px solid #fff; cursor:move; touch-action:none;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.55);
+  background-image:
+    linear-gradient(to right,transparent calc(33.33% - .5px),rgba(255,255,255,.35) 33.33%,rgba(255,255,255,.35) calc(33.33% + .5px),transparent calc(33.33% + .5px),transparent calc(66.66% - .5px),rgba(255,255,255,.35) 66.66%,rgba(255,255,255,.35) calc(66.66% + .5px),transparent calc(66.66% + .5px)),
+    linear-gradient(to bottom,transparent calc(33.33% - .5px),rgba(255,255,255,.35) 33.33%,rgba(255,255,255,.35) calc(33.33% + .5px),transparent calc(33.33% + .5px),transparent calc(66.66% - .5px),rgba(255,255,255,.35) 66.66%,rgba(255,255,255,.35) calc(66.66% + .5px),transparent calc(66.66% + .5px));
+}
+.crop-handle{
+  position:absolute; width:18px; height:18px; background:#fff;
+  border-radius:5px; border:2px solid var(--primary); box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.crop-handle[data-handle="nw"]{top:-9px; left:-9px; cursor:nwse-resize}
+.crop-handle[data-handle="ne"]{top:-9px; right:-9px; cursor:nesw-resize}
+.crop-handle[data-handle="sw"]{bottom:-9px; left:-9px; cursor:nesw-resize}
+.crop-handle[data-handle="se"]{bottom:-9px; right:-9px; cursor:nwse-resize}
+.crop-toolbar{
+  background:rgba(255,255,255,.06); border-top:1px solid rgba(255,255,255,.08);
+  padding:16px 24px; display:flex; flex-direction:column; gap:14px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+}
+.crop-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.crop-row .label{color:rgba(255,255,255,.6); font-size:.8rem; font-weight:600; min-width:36px}
+.ratio-group{display:flex; gap:6px; flex-wrap:wrap}
+.ratio-btn{
+  background:rgba(255,255,255,.1); border:none; color:rgba(255,255,255,.8);
+  padding:8px 14px; border-radius:9px; font-size:.8rem; cursor:pointer;
+  transition:all .2s; font-weight:600; font-family:inherit; min-height:38px;
+}
+.ratio-btn:hover{background:rgba(255,255,255,.2)}
+.ratio-btn.active{background:var(--grad); color:#fff; box-shadow:0 4px 14px rgba(236,72,153,.4)}
+.zoom-slider{flex:1; min-width:140px; accent-color:var(--pink); height:6px}
+.crop-actions{display:flex; justify-content:flex-end; gap:10px}
+/* ===== 响应式：平板 / 手机 ===== */
+@media (max-width:768px){
+  .container{padding:16px 12px 40px}
+  .card{padding:16px; border-radius:16px}
+  .header{padding:18px 18px; padding-top:calc(18px + env(safe-area-inset-top)); border-radius:0 0 18px 18px}
+  .header h1{font-size:1.15rem}
+  .header .sub{font-size:.72rem}
+  .btn{min-height:44px; padding:10px 16px}
+  .btn-sm{min-height:38px; padding:8px 12px}
+  .token-row{flex-direction:column}
+  .token-row input{min-width:0; font-size:16px; width:100%}
+  .token-row .btn{width:100%}
+  .drop-zone{padding:28px 14px}
+  .drop-zone p{font-size:.9rem}
+  .drop-zone .hint{font-size:.72rem; line-height:1.5}
+  .gallery{grid-template-columns:1fr; gap:14px}
+  .item-preview{height:200px}
+  .link-row input{font-size:14px}
+  .pending-item{flex-wrap:wrap; gap:10px}
+  .pending-actions{width:100%; justify-content:flex-end}
+  .pending-actions .btn{flex:1}
+  #uploadBar .btn{flex:1}
+  .toast{bottom:calc(24px + env(safe-area-inset-bottom)); padding:12px 20px; font-size:.85rem}
+  .crop-toolbar{padding:12px 14px; padding-bottom:calc(12px + env(safe-area-inset-bottom)); max-height:52vh; overflow-y:auto}
+  .crop-header{padding:12px 16px; padding-top:calc(12px + env(safe-area-inset-top))}
+  .crop-handle{width:24px; height:24px; border-radius:6px}
+  .crop-handle[data-handle="nw"]{top:-12px; left:-12px}
+  .crop-handle[data-handle="ne"]{top:-12px; right:-12px}
+  .crop-handle[data-handle="sw"]{bottom:-12px; left:-12px}
+  .crop-handle[data-handle="se"]{bottom:-12px; right:-12px}
+  .crop-row .label{min-width:32px; font-size:.75rem}
+  .ratio-btn{padding:8px 12px; font-size:.75rem}
+  .crop-actions .btn{flex:1}
+  .desktop-only{display:none}
+}
+@media (max-width:380px){
+  .header h1{font-size:1rem}
+  .card{padding:14px}
+  .pending-thumb{width:50px; height:50px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🖼️ 我的 GitHub 图床</h1>
+    <div class="sub">多图上传 · 在线裁剪 · 一键复制外链</div>
+  </div>
+  <button class="btn btn-white" id="refreshBtn">刷新图库</button>
+</div>
+
+<div class="container">
+
+  <!-- Token -->
+  <div class="card">
+    <h2><span class="dot"></span>GitHub Token 设置</h2>
+    <div class="token-row">
+      <input type="password" id="tokenInput" placeholder="粘贴你的 GitHub Token（ghp_ 开头）"
+             autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button class="btn btn-ghost btn-sm" id="pasteTokenBtn">粘贴</button>
+      <button class="btn btn-grad" id="saveTokenBtn">保存 Token</button>
+      <button class="btn btn-ghost btn-sm" id="clearTokenBtn">清除</button>
+    </div>
+  </div>
+
+  <!-- 上传 -->
+  <div class="card">
+    <h2><span class="dot"></span>上传文件</h2>
+    <div class="drop-zone" id="dropZone">
+      <span class="icon">☁️</span>
+      <p>点击选择文件<span class="desktop-only">，或拖拽到这里</span></p>
+      <div class="hint">支持 jpg / png / gif / webp / svg / bmp / ico / mp3 / wav / m4a / ogg / flac / aac · 可多选</div>
+    </div>
+    <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.ico,.mp3,.wav,.m4a,.ogg,.flac,.aac" style="display:none">
+
+    <div class="pending-list" id="pendingList"></div>
+
+    <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+
+    <div id="uploadBar" style="display:none; margin-top:16px; display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-ghost" id="clearPendingBtn">清空列表</button>
+      <button class="btn btn-grad" id="uploadAllBtn">开始上传</button>
+    </div>
+  </div>
+
+  <!-- 图库 -->
+  <div class="card">
+    <h2><span class="dot"></span>图库 <span style="font-weight:400;color:#a8a3b8;font-size:.8rem;margin-left:auto" id="galleryCount"></span></h2>
+    <div class="gallery" id="gallery"></div>
+    <div class="empty-tip" id="emptyTip"><span class="big">📭</span>暂无文件，上传后会显示在这里</div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 裁剪模态框 -->
+<div class="crop-modal" id="cropModal">
+  <div class="crop-header">
+    <h3>✂️ 裁剪图片</h3>
+    <button class="crop-close" id="cropClose">✕</button>
+  </div>
+  <div class="crop-stage" id="cropStage">
+    <canvas id="cropCanvas"></canvas>
+    <div class="crop-box" id="cropBox">
+      <div class="crop-handle" data-handle="nw"></div>
+      <div class="crop-handle" data-handle="ne"></div>
+      <div class="crop-handle" data-handle="sw"></div>
+      <div class="crop-handle" data-handle="se"></div>
+    </div>
+  </div>
+  <div class="crop-toolbar">
+    <div class="crop-row">
+      <span class="label">比例</span>
+      <div class="ratio-group" id="ratioGroup">
+        <button class="ratio-btn active" data-ratio="free">自由</button>
+        <button class="ratio-btn" data-ratio="1">1:1</button>
+        <button class="ratio-btn" data-ratio="1.333">4:3</button>
+        <button class="ratio-btn" data-ratio="1.777">16:9</button>
+        <button class="ratio-btn" data-ratio="0.5625">9:16</button>
+      </div>
+    </div>
+    <div class="crop-row">
+      <span class="label">缩放</span>
+      <input type="range" class="zoom-slider" id="cropZoom" min="50" max="300" value="100">
+    </div>
+    <div class="crop-actions">
+      <button class="btn btn-ghost btn-sm" id="cropReset">重置</button>
+      <button class="btn btn-ghost btn-sm" id="cropCancel">取消</button>
+      <button class="btn btn-grad btn-sm" id="cropConfirm">确认裁剪</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+ *  配置区：已按你的仓库填好，如需换仓库改这里
+ * ============================================================ */
+const CONFIG = {
+  username: '99434',
+  repo: 'xing',
+  branch: 'main'
+};
+
+const API_BASE  = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/`;
+const TOKEN_KEY = 'github_imghost_token';
+const RAW_BASE  = `https://cdn.jsdelivr.net/gh/${CONFIG.username}/${CONFIG.repo}@${CONFIG.branch}/`;
+
+/* ==================== 通用工具 ==================== */
+const $ = id => document.getElementById(id);
+
+function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
+
+let toastTimer;
+function toast(msg, type = '') {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = 'toast', 2600);
+}
+
+function getHeaders() {
+  const t = getToken();
+  if (!t) throw new Error('请先设置 GitHub Token');
+  return {
+    'Authorization': `token ${t}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+}
+
+const isImage = n => /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(n);
+const isAudio = n => /\.(mp3|wav|m4a|ogg|flac|aac)$/i.test(n);
+
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(2) + ' MB';
+}
+
+/* 跨端复制：优先剪贴板 API，失败降级 */
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('copy failed'));
+    } catch (e) {
+      document.body.removeChild(ta);
+      reject(e);
+    }
+  });
+}
+
+/* ==================== 全局状态 ==================== */
+let pendingFiles = [];
+let existingNames = new Set();
+let uid = 0;
+
+/* ==================== Token 管理 ==================== */
+$('saveTokenBtn').onclick = () => {
+  const t = $('tokenInput').value.trim();
+  if (!t) return toast('请先粘贴 Token', 'error');
+  localStorage.setItem(TOKEN_KEY, t);
+  toast('Token 已保存 ✓', 'success');
+  loadGallery();
+};
+
+$('clearTokenBtn').onclick = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  $('tokenInput').value = '';
+  toast('Token 已清除');
+};
+
+/* 手机端：一键从剪贴板粘贴 Token */
+$('pasteTokenBtn').onclick = async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text || !text.trim()) return toast('剪贴板是空的', 'error');
+    $('tokenInput').value = text.trim();
+    toast('已粘贴，点「保存 Token」生效', 'success');
+  } catch (e) {
+    toast('无法读取剪贴板，请长按输入框手动粘贴', 'error');
+  }
+};
+
+/* ==================== 文件选择 / 拖拽 ==================== */
+const dropZone = $('dropZone');
+const fileInput = $('fileInput');
+
+dropZone.onclick = () => fileInput.click();
+
+fileInput.onchange = () => {
+  addFiles(Array.from(fileInput.files));
+  fileInput.value = '';
+};
+
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const files = Array.from(e.dataTransfer.files).filter(f => isImage(f.name) || isAudio(f.name));
+  if (files.length) addFiles(files);
+  else toast('只支持图片和音频文件', 'error');
+});
+
+function addFiles(files) {
+  const valid = files.filter(f => isImage(f.name) || isAudio(f.name));
+  if (!valid.length) return toast('没有可用的图片或音频文件', 'error');
+
+  valid.forEach(f => {
+    pendingFiles.push({
+      id: ++uid,
+      file: f,
+      previewUrl: URL.createObjectURL(f),
+      cropped: false
+    });
+  });
+  renderPending();
+  toast(`已添加 ${valid.length} 个文件`, 'success');
+}
+
+/* ==================== 待上传列表渲染 ==================== */
+function renderPending() {
+  const list = $('pendingList');
+  const bar  = $('uploadBar');
+
+  if (!pendingFiles.length) {
+    list.innerHTML = '';
+    bar.style.display = 'none';
+    return;
+  }
+
+  bar.style.display = 'flex';
+  $('uploadAllBtn').textContent = `开始上传（${pendingFiles.length}）`;
+
+  list.innerHTML = pendingFiles.map(item => {
+    const isImg = isImage(item.file.name);
+    return `
+      <div class="pending-item" data-id="${item.id}">
+        <div class="pending-thumb">
+          ${isImg
+            ? `<img src="${item.previewUrl}" alt="">`
+            : `<span style="font-size:1.4rem">🎵</span>`}
+        </div>
+        <div class="pending-meta">
+          <div class="pending-name">${item.file.name}
+            ${item.cropped ? '<span class="pending-badge">已裁剪</span>' : ''}
+          </div>
+          <div class="pending-size">${fmtSize(item.file.size)}</div>
+        </div>
+        <div class="pending-actions">
+          ${isImg ? `<button class="btn btn-ghost btn-sm" data-act="crop">✂️ 裁剪</button>` : ''}
+          <button class="btn btn-danger btn-sm" data-act="remove">移除</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.pending-item').forEach(el => {
+    const id = +el.dataset.id;
+    const item = pendingFiles.find(p => p.id === id);
+    const cropBtn = el.querySelector('[data-act="crop"]');
+    if (cropBtn) cropBtn.onclick = () => cropPending(item);
+    el.querySelector('[data-act="remove"]').onclick = () => {
+      URL.revokeObjectURL(item.previewUrl);
+      pendingFiles = pendingFiles.filter(p => p.id !== id);
+      renderPending();
+    };
+  });
+}
+
+$('clearPendingBtn').onclick = () => {
+  pendingFiles.forEach(p => URL.revokeObjectURL(p.previewUrl));
+  pendingFiles = [];
+  renderPending();
+};
+
+/* ==================== 裁剪器 ==================== */
+const crop = {
+  img: null,
+  imgX: 0, imgY: 0, scale: 1, baseScale: 1,
+  stageW: 0, stageH: 0,
+  box: { x: 0, y: 0, w: 0, h: 0 },
+  ratio: null,
+  onConfirm: null,
+  outName: ''
+};
+
+const cropModal = $('cropModal');
+const cropStage = $('cropStage');
+const cropCanvas = $('cropCanvas');
+const cropBoxEl = $('cropBox');
+const cropCtx = cropCanvas.getContext('2d');
+
+function openCropper(source, opts) {
+  crop.outName = opts.fileName;
+  crop.onConfirm = opts.onConfirm;
+  crop.ratio = null;
+  document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b.dataset.ratio === 'free'));
+  $('cropZoom').value = 100;
+
+  cropModal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+
+  const isFile = source instanceof File || source instanceof Blob;
+  const url = isFile ? URL.createObjectURL(source) : source;
+
+  img.onload = () => {
+    requestAnimationFrame(() => {
+      setupCrop(img);
+      if (isFile) URL.revokeObjectURL(url);
+    });
+  };
+  img.onerror = () => {
+    toast('图片加载失败（可能是跨域限制）', 'error');
+    closeCropper();
+    if (isFile) URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+function closeCropper() {
+  cropModal.classList.remove('show');
+  document.body.style.overflow = '';
+  crop.img = null;
+  crop.onConfirm = null;
+}
+
+$('cropClose').onclick = closeCropper;
+$('cropCancel').onclick = closeCropper;
+
+function setupCrop(img) {
+  crop.img = img;
+
+  const rect = cropStage.getBoundingClientRect();
+  crop.stageW = rect.width;
+  crop.stageH = rect.height;
+
+  const dpr = window.devicePixelRatio || 1;
+  cropCanvas.width  = crop.stageW * dpr;
+  cropCanvas.height = crop.stageH * dpr;
+  cropCanvas.style.width  = crop.stageW + 'px';
+  cropCanvas.style.height = crop.stageH + 'px';
+  cropCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const fit = Math.min(crop.stageW / img.width, crop.stageH / img.height) * 0.9;
+  crop.baseScale = fit;
+  crop.scale = fit;
+  crop.imgX = (crop.stageW - img.width * fit) / 2;
+  crop.imgY = (crop.stageH - img.height * fit) / 2;
+
+  const dw = img.width * fit;
+  const dh = img.height * fit;
+  const bw = dw * 0.7;
+  const bh = dh * 0.7;
+  crop.box = {
+    x: crop.imgX + (dw - bw) / 2,
+    y: crop.imgY + (dh - bh) / 2,
+    w: bw, h: bh
+  };
+
+  drawCanvas();
+  syncBoxEl();
+}
+
+function drawCanvas() {
+  const { img, imgX, imgY, scale, stageW, stageH } = crop;
+  if (!img) return;
+  cropCtx.clearRect(0, 0, stageW, stageH);
+  cropCtx.drawImage(img, imgX, imgY, img.width * scale, img.height * scale);
+}
+
+function syncBoxEl() {
+  const b = crop.box;
+  cropBoxEl.style.left   = b.x + 'px';
+  cropBoxEl.style.top    = b.y + 'px';
+  cropBoxEl.style.width  = b.w + 'px';
+  cropBoxEl.style.height = b.h + 'px';
+}
+
+function visibleBounds() {
+  const { img, imgX, imgY, scale, stageW, stageH } = crop;
+  return {
+    minX: Math.max(0, imgX),
+    minY: Math.max(0, imgY),
+    maxX: Math.min(stageW, imgX + img.width * scale),
+    maxY: Math.min(stageH, imgY + img.height * scale)
+  };
+}
+
+function clampBox() {
+  const b = crop.box;
+  const vb = visibleBounds();
+  const minW = 40, minH = 40;
+  b.w = Math.max(minW, Math.min(b.w, vb.maxX - vb.minX));
+  b.h = Math.max(minH, Math.min(b.h, vb.maxY - vb.minY));
+  b.x = Math.max(vb.minX, Math.min(b.x, vb.maxX - b.w));
+  b.y = Math.max(vb.minY, Math.min(b.y, vb.maxY - b.h));
+}
+
+let drag = null;
+
+cropBoxEl.addEventListener('pointerdown', e => {
+  const handle = e.target.dataset.handle;
+  drag = {
+    mode: handle ? 'resize' : 'move',
+    handle: handle || '',
+    startX: e.clientX,
+    startY: e.clientY,
+    box: { ...crop.box }
+  };
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+window.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.startX;
+  const dy = e.clientY - drag.startY;
+
+  if (drag.mode === 'move') {
+    crop.box.x = drag.box.x + dx;
+    crop.box.y = drag.box.y + dy;
+    clampBox();
+  } else {
+    resizeBox(drag.handle, dx, dy, drag.box);
+  }
+  syncBoxEl();
+  drawCanvas();
+});
+
+window.addEventListener('pointerup', () => { drag = null; });
+window.addEventListener('pointercancel', () => { drag = null; });
+
+function resizeBox(handle, dx, dy, start) {
+  let { x, y, w, h } = start;
+  const minSize = 40;
+
+  if (handle.includes('e')) w = start.w + dx;
+  if (handle.includes('w')) w = start.w - dx;
+  if (handle.includes('s')) h = start.h + dy;
+  if (handle.includes('n')) h = start.h - dy;
+
+  if (w < minSize) w = minSize;
+  if (h < minSize) h = minSize;
+
+  if (crop.ratio) {
+    const r = crop.ratio;
+    const isCorner = handle.length === 2;
+    if (isCorner) {
+      h = w / r;
+      if (h < minSize) { h = minSize; w = h * r; }
+    } else if (handle === 'n' || handle === 's') {
+      w = h * r;
+    } else {
+      h = w / r;
+    }
+  }
+
+  if (handle.includes('w')) x = start.x + start.w - w;
+  if (handle.includes('n')) y = start.y + start.h - h;
+
+  crop.box = { x, y, w, h };
+  clampBox();
+}
+
+$('ratioGroup').addEventListener('click', e => {
+  const btn = e.target.closest('.ratio-btn');
+  if (!btn) return;
+  document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const r = btn.dataset.ratio;
+  crop.ratio = r === 'free' ? null : parseFloat(r);
+
+  if (crop.ratio) {
+    const b = crop.box;
+    const cx = b.x + b.w / 2;
+    const cy = b.y + b.h / 2;
+    let w = b.w;
+    let h = w / crop.ratio;
+    if (h > b.h) { h = b.h; w = h * crop.ratio; }
+    crop.box = { x: cx - w / 2, y: cy - h / 2, w, h };
+    clampBox();
+    syncBoxEl();
+    drawCanvas();
+  }
+});
+
+$('cropZoom').oninput = e => {
+  if (!crop.img) return;
+  const newScale = crop.baseScale * (parseInt(e.target.value) / 100);
+  const cx = crop.box.x + crop.box.w / 2;
+  const cy = crop.box.y + crop.box.h / 2;
+  const ix = (cx - crop.imgX) / crop.scale;
+  const iy = (cy - crop.imgY) / crop.scale;
+  crop.imgX = cx - ix * newScale;
+  crop.imgY = cy - iy * newScale;
+  crop.scale = newScale;
+  clampBox();
+  syncBoxEl();
+  drawCanvas();
+};
+
+$('cropReset').onclick = () => {
+  if (!crop.img) return;
+  $('cropZoom').value = 100;
+  crop.ratio = null;
+  document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b.dataset.ratio === 'free'));
+  const img = crop.img;
+  const fit = crop.baseScale;
+  crop.scale = fit;
+  crop.imgX = (crop.stageW - img.width * fit) / 2;
+  crop.imgY = (crop.stageH - img.height * fit) / 2;
+  const dw = img.width * fit, dh = img.height * fit;
+  crop.box = {
+    x: crop.imgX + dw * 0.15,
+    y: crop.imgY + dh * 0.15,
+    w: dw * 0.7,
+    h: dh * 0.7
+  };
+  clampBox();
+  syncBoxEl();
+  drawCanvas();
+};
+
+$('cropConfirm').onclick = () => {
+  if (!crop.img) return;
+  const { img, imgX, imgY, scale, box } = crop;
+
+  let sx = (box.x - imgX) / scale;
+  let sy = (box.y - imgY) / scale;
+  let sw = box.w / scale;
+  let sh = box.h / scale;
+
+  sx = Math.max(0, Math.min(img.width - 1, sx));
+  sy = Math.max(0, Math.min(img.height - 1, sy));
+  sw = Math.min(img.width - sx, sw);
+  sh = Math.min(img.height - sy, sh);
+
+  const out = document.createElement('canvas');
+  out.width  = Math.max(1, Math.round(sw));
+  out.height = Math.max(1, Math.round(sh));
+  out.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
+
+  const name = crop.outName;
+  const ext = (name.match(/\.\w+$/) || ['.png'])[0].toLowerCase();
+  const keepPng = ['.png', '.svg', '.gif', '.bmp', '.ico'].includes(ext);
+  const mime = keepPng ? 'image/png' : 'image/jpeg';
+
+  out.toBlob(blob => {
+    if (!blob) return toast('裁剪失败', 'error');
+    const newExt = keepPng ? '.png' : '.jpg';
+    const base = name.replace(/\.\w+$/, '').replace(/_crop$/, '');
+    const outName = `${base}_crop${newExt}`;
+
+    if (crop.onConfirm) crop.onConfirm(blob, outName);
+    closeCropper();
+  }, mime, 0.92);
+};
+
+function cropPending(item) {
+  openCropper(item.file, {
+    fileName: item.file.name,
+    onConfirm: (blob, outName) => {
+      const newFile = new File([blob], outName, { type: blob.type });
+      URL.revokeObjectURL(item.previewUrl);
+      item.file = newFile;
+      item.previewUrl = URL.createObjectURL(newFile);
+      item.cropped = true;
+      renderPending();
+      toast('裁剪完成，点击「开始上传」即可上传', 'success');
+    }
+  });
+}
+
+/* ==================== 上传 ==================== */
+async function ensureUniqueName(name) {
+  if (!existingNames.has(name)) return name;
+  const ext = (name.match(/\.\w+$/) || [''])[0];
+  const base = name.slice(0, name.length - ext.length);
+  let i = 1;
+  let candidate = `${base}_${i}${ext}`;
+  while (existingNames.has(candidate)) {
+    i++;
+    candidate = `${base}_${i}${ext}`;
+  }
+  return candidate;
+}
+
+async function uploadOne(file) {
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+
+  const finalName = await ensureUniqueName(file.name);
+  const res = await fetch(API_BASE + encodeURIComponent(finalName), {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify({
+      message: `upload: ${finalName}`,
+      content: base64,
+      branch: CONFIG.branch
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `HTTP ${res.status}`);
+  }
+  existingNames.add(finalName);
+  return finalName;
+}
+
+$('uploadAllBtn').onclick = async () => {
+  if (!getToken()) return toast('请先设置 GitHub Token', 'error');
+  const items = [...pendingFiles];
+  if (!items.length) return;
+
+  const bar = $('progressBar');
+  const wrap = $('progressWrap');
+  wrap.style.display = 'block';
+  $('uploadAllBtn').disabled = true;
+
+  let ok = 0, fail = 0;
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    bar.style.width = Math.round((i / items.length) * 100) + '%';
+    toast(`正在上传 ${item.file.name}（${i + 1}/${items.length}）…`);
+
+    try {
+      await uploadOne(item.file);
+      ok++;
+    } catch (e) {
+      fail++;
+      console.error('上传失败:', item.file.name, e);
+    }
+
+    URL.revokeObjectURL(item.previewUrl);
+    pendingFiles = pendingFiles.filter(p => p.id !== item.id);
+    renderPending();
+  }
+
+  bar.style.width = '100%';
+  setTimeout(() => { wrap.style.display = 'none'; bar.style.width = '0'; }, 700);
+  $('uploadAllBtn').disabled = false;
+
+  if (fail === 0) toast(`全部 ${ok} 个文件上传成功 ✓`, 'success');
+  else toast(`完成：成功 ${ok} 个，失败 ${fail} 个`, 'error');
+
+  loadGallery();
+};
+
+/* ==================== 图库 ==================== */
+async function loadGallery() {
+  const gallery = $('gallery');
+  const emptyTip = $('emptyTip');
+
+  if (!getToken()) {
+    gallery.innerHTML = '';
+    $('galleryCount').textContent = '';
+    emptyTip.style.display = 'block';
+    emptyTip.innerHTML = '<span class="big">🔑</span>请先在上方设置 GitHub Token';
+    return;
+  }
+
+  gallery.innerHTML = '<div style="padding:30px;color:#a8a3b8;text-align:center;grid-column:1/-1">正在加载…</div>';
+  emptyTip.style.display = 'none';
+
+  try {
+    const res = await fetch(API_BASE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const files = (Array.isArray(data) ? data : []).filter(f =>
+      f.type === 'file' && (isImage(f.name) || isAudio(f.name))
+    );
+
+    existingNames = new Set(files.map(f => f.name));
+    $('galleryCount').textContent = files.length ? `共 ${files.length} 个文件` : '';
+
+    if (!files.length) {
+      gallery.innerHTML = '';
+      emptyTip.style.display = 'block';
+      emptyTip.innerHTML = '<span class="big">📭</span>暂无文件，上传后会显示在这里';
+      return;
+    }
+
+    emptyTip.style.display = 'none';
+    gallery.innerHTML = files.map(renderCard).join('');
+    bindCards(files);
+  } catch (e) {
+    gallery.innerHTML = '';
+    emptyTip.style.display = 'block';
+    emptyTip.innerHTML = `<span class="big">⚠️</span>加载失败：${e.message}`;
+    toast('加载图库失败：' + e.message, 'error');
+  }
+}
+
+function renderCard(file) {
+  const name = file.name;
+  const sha = file.sha;
+  const url = RAW_BASE + encodeURIComponent(name);
+  const img = isImage(name);
+
+  const preview = img
+    ? `<div class="item-preview">
+         <img src="${url}" alt="${name}" loading="lazy" onerror="this.style.display='none'">
+         <div class="crop-hint">点击图片可裁剪</div>
+       </div>`
+    : `<div class="item-preview"><audio controls preload="none" src="${url}"></audio></div>`;
+
+  return `
+    <div class="item-card" data-name="${name}" data-sha="${sha}">
+      ${preview}
+      <div class="item-body">
+        <div class="item-name" title="${name}">${name}</div>
+        <div class="link-row">
+          <input type="text" readonly value="${url}" class="link-input">
+          <button class="btn btn-ghost btn-sm copy-btn">复制</button>
+        </div>
+        <div class="action-row">
+          <button class="btn btn-ghost btn-sm open-btn">打开</button>
+          ${img ? '<button class="btn btn-ghost btn-sm crop-btn">✂️ 裁剪</button>' : ''}
+          <button class="btn btn-danger btn-sm delete-btn">删除</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function bindCards() {
+  document.querySelectorAll('.item-card').forEach(card => {
+    const name = card.dataset.name;
+    const sha = card.dataset.sha;
+    const linkInput = card.querySelector('.link-input');
+    const url = linkInput.value;
+
+    card.querySelector('.copy-btn').onclick = () => {
+      copyText(url)
+        .then(() => toast('链接已复制 ✓', 'success'))
+        .catch(() => {
+          linkInput.select();
+          document.execCommand('copy');
+          toast('链接已复制 ✓', 'success');
+        });
+    };
+
+    card.querySelector('.open-btn').onclick = () => window.open(url, '_blank');
+
+    const cropBtn = card.querySelector('.crop-btn');
+    if (cropBtn) {
+      cropBtn.onclick = () => cropGalleryImage(name, url);
+    }
+
+    const previewImg = card.querySelector('.item-preview img');
+    if (previewImg) {
+      previewImg.onclick = () => cropGalleryImage(name, url);
+    }
+
+    card.querySelector('.delete-btn').onclick = async () => {
+      if (!confirm(`确定删除「${name}」吗？`)) return;
+      if (!getToken()) return toast('请先设置 Token', 'error');
+
+      try {
+        const res = await fetch(API_BASE + encodeURIComponent(name), {
+          method: 'DELETE',
+          headers: getHeaders(),
+          body: JSON.stringify({
+            message: `delete: ${name}`,
+            sha: sha,
+            branch: CONFIG.branch
+          })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || `HTTP ${res.status}`);
+        }
+        toast(`「${name}」已删除`, 'success');
+        loadGallery();
+      } catch (e) {
+        toast('删除失败：' + e.message, 'error');
+      }
+    };
+  });
+}
+
+function cropGalleryImage(name, url) {
+  openCropper(url, {
+    fileName: name,
+    onConfirm: async (blob, outName) => {
+      if (!getToken()) return toast('请先设置 Token', 'error');
+      const file = new File([blob], outName, { type: blob.type });
+
+      toast('正在上传裁剪后的图片…');
+      try {
+        const finalName = await uploadOne(file);
+        toast(`已上传为「${finalName}」✓`, 'success');
+        loadGallery();
+      } catch (e) {
+        toast('上传失败：' + e.message, 'error');
+      }
+    }
+  });
+}
+
+/* ==================== 刷新 ==================== */
+$('refreshBtn').onclick = () => {
+  loadGallery();
+  toast('正在刷新…');
+};
+
+/* ==================== 初始化 ==================== */
+(function init() {
+  const saved = getToken();
+  if (saved) $('tokenInput').value = saved;
+  loadGallery();
+
+  window.addEventListener('resize', () => {
+    if (cropModal.classList.contains('show')) closeCropper();
+  });
+})();
+</script>
+</body>
+</html>
