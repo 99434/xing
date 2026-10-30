@@ -201,7 +201,15 @@ body{
 
 /* 文件名与时间 */
 .item-title-row { display: flex; flex-direction: column; gap: 2px; }
-.item-name{font-size:.8rem; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.item-name{
+  font-size:.8rem; color:var(--text); font-weight:600;
+  overflow:hidden; display:flex; align-items:center; gap:4px;
+  cursor:pointer; transition:color .2s; user-select:none;
+}
+.item-name .name-text{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;}
+.item-name .edit-icon{font-size:.7rem; opacity:.35; transition:opacity .2s; flex-shrink:0;}
+.item-name:hover{color:var(--primary);}
+.item-name:hover .edit-icon{opacity:1;}
 .item-time{font-size:.7rem; color:#a8a3b8; font-family:monospace;}
 
 .link-row{display:flex; gap:6px}
@@ -223,6 +231,34 @@ body{
 .toast.success{background:#10b981}
 .empty-tip{text-align:center; color:#c4bdd6; padding:50px 0; font-size:.9rem}
 .empty-tip .big{font-size:2.4rem; display:block; margin-bottom:10px}
+
+/* ===== 改名模态框 ===== */
+.rename-modal{
+  position:fixed; inset:0; background:rgba(15,10,35,.65); z-index:10000;
+  display:none; align-items:center; justify-content:center; padding:20px;
+  backdrop-filter:blur(6px);
+}
+.rename-modal.show{display:flex;}
+.rename-dialog{
+  background:#fff; border-radius:20px; padding:24px; width:100%; max-width:440px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
+  animation:modalIn .25s ease;
+}
+@keyframes modalIn{
+  from{opacity:0; transform:scale(.95) translateY(10px);}
+  to{opacity:1; transform:scale(1) translateY(0);}
+}
+.rename-dialog h3{
+  font-size:1.05rem; margin-bottom:16px; color:var(--text);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.rename-dialog input{
+  width:100%; padding:12px 16px; border:2px solid var(--border); border-radius:12px;
+  font-size:.95rem; outline:none; font-family:inherit; transition:border .2s;
+}
+.rename-dialog input:focus{border-color:var(--primary);}
+.rename-hint{font-size:.75rem; color:var(--muted); margin-top:10px; line-height:1.5;}
+.rename-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:20px;}
 
 /* ===== 裁剪模态框 ===== */
 .crop-modal{
@@ -321,6 +357,9 @@ body{
   .date-filter-row { flex-wrap: wrap; }
   .date-input { flex: 1; font-size:16px; width: 100%; }
   #clearDateBtn { width: 100%; }
+  .gallery-head{flex-direction:column !important; align-items:stretch !important;}
+  .gallery-head .type-filters{width:100%;}
+  .rename-dialog{padding:20px;}
 }
 @media (max-width:380px){
   .header h1{font-size:1rem}
@@ -375,15 +414,18 @@ body{
 
   <!-- 图库 -->
   <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+    <div class="gallery-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
       <h2 style="margin-bottom:0;"><span class="dot"></span>图库 <span style="font-weight:400;color:#a8a3b8;font-size:.8rem;" id="galleryCount"></span></h2>
-      
-      <!-- 右上角：动态后缀分类 -->
-      <div class="type-filters" id="typeFilters">
-        <button class="filter-btn active" data-type="all">全部</button>
+
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" id="fillDatesBtn" style="display:none;">⏱️ 补全历史时间</button>
+        <!-- 右上角：动态后缀分类 -->
+        <div class="type-filters" id="typeFilters">
+          <button class="filter-btn active" data-type="all">全部</button>
+        </div>
       </div>
     </div>
-    
+
     <!-- 搜索与日期筛选栏 -->
     <div class="filter-bar">
       <div class="search-box">
@@ -400,7 +442,7 @@ body{
 
     <!-- 按时间折叠的容器 -->
     <div class="gallery-wrapper" id="gallery"></div>
-    
+
     <div class="empty-tip" id="emptyTip"><span class="big">📭</span>暂无文件，上传后会显示在这里</div>
   </div>
 
@@ -408,6 +450,19 @@ body{
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- 改名模态框 -->
+<div class="rename-modal" id="renameModal">
+  <div class="rename-dialog">
+    <h3>✏️ 重命名文件</h3>
+    <input type="text" id="renameInput" placeholder="输入新文件名" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="rename-hint">💡 建议保留原后缀（如 .jpg / .png），避免显示异常。</div>
+    <div class="rename-actions">
+      <button class="btn btn-ghost" id="renameCancelBtn">取消</button>
+      <button class="btn btn-grad" id="renameConfirmBtn">确认改名</button>
+    </div>
+  </div>
+</div>
 
 <!-- 裁剪模态框 -->
 <div class="crop-modal" id="cropModal">
@@ -457,10 +512,11 @@ const CONFIG = {
   branch: 'main'
 };
 
-const API_BASE  = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/`;
+const API_BASE    = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/`;
 const API_COMMITS = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/commits`;
-const TOKEN_KEY = 'github_imghost_token';
-const RAW_BASE  = `https://cdn.jsdelivr.net/gh/${CONFIG.username}/${CONFIG.repo}@${CONFIG.branch}/`;
+const TOKEN_KEY   = 'github_imghost_token';
+const RAW_BASE    = `https://cdn.jsdelivr.net/gh/${CONFIG.username}/${CONFIG.repo}@${CONFIG.branch}/`;
+const DATES_FILE  = '_dates.json';
 
 /* ==================== 通用工具 ==================== */
 const $ = id => document.getElementById(id);
@@ -519,17 +575,102 @@ function copyText(text) {
   });
 }
 
+/* UTF-8 安全的 Base64 编解码（文件名可能有中文） */
+function encodeBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+function decodeBase64(b64) {
+  const clean = b64.replace(/\s/g, '');
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
 /* ==================== 全局状态 ==================== */
 let pendingFiles = [];
 let existingNames = new Set();
 let uid = 0;
 
 // 搜索、类型、日期筛选状态
-let allFilesData = []; 
-let globalFileDates = {}; // 存储完整的 YYYY-MM-DDTHH:mm:ssZ
+let allFilesData = [];
+let globalFileDates = {}; // { 文件名: ISO时间字符串 }
 let currentFilterType = 'all';
 let currentSearchKeyword = '';
-let currentFilterDate = ''; 
+let currentFilterDate = '';
+
+/* ==================== _dates.json 时间记录 ==================== */
+async function loadDatesJson() {
+  try {
+    const res = await fetch(API_BASE + DATES_FILE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
+    if (!res.ok) return { data: {}, sha: null };
+    const json = await res.json();
+    const content = decodeBase64(json.content);
+    return { data: JSON.parse(content), sha: json.sha };
+  } catch (e) {
+    return { data: {}, sha: null };
+  }
+}
+
+async function saveDatesJson(data, sha) {
+  const content = encodeBase64(JSON.stringify(data, null, 2));
+  const body = {
+    message: `update _dates.json (${new Date().toISOString()})`,
+    content,
+    branch: CONFIG.branch
+  };
+  if (sha) body.sha = sha;
+  const res = await fetch(API_BASE + DATES_FILE, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || '保存时间记录失败');
+  }
+}
+
+async function recordFileDate(name, dateStr) {
+  try {
+    const { data, sha } = await loadDatesJson();
+    data[name] = dateStr;
+    await saveDatesJson(data, sha);
+    globalFileDates[name] = dateStr;
+  } catch (e) {
+    console.error('记录时间失败', e);
+  }
+}
+
+async function deleteFileDate(name) {
+  try {
+    const { data, sha } = await loadDatesJson();
+    if (data[name]) {
+      delete data[name];
+      await saveDatesJson(data, sha);
+    }
+    delete globalFileDates[name];
+  } catch (e) {
+    console.error('删除时间记录失败', e);
+  }
+}
 
 /* ==================== Token 管理 ==================== */
 $('saveTokenBtn').onclick = () => {
@@ -878,6 +1019,8 @@ async function uploadOne(file) {
   });
   if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `HTTP ${res.status}`); }
   existingNames.add(finalName);
+  // ⭐ 关键：上传成功后，立刻把精确时间写入 _dates.json
+  await recordFileDate(finalName, new Date().toISOString());
   return finalName;
 }
 
@@ -915,6 +1058,7 @@ async function loadGallery() {
     gallery.innerHTML = ''; $('galleryCount').textContent = '';
     emptyTip.style.display = 'block';
     emptyTip.innerHTML = '<span class="big">🔑</span>请先在上方设置 GitHub Token';
+    $('fillDatesBtn').style.display = 'none';
     return;
   }
 
@@ -926,7 +1070,7 @@ async function loadGallery() {
     const resContent = await fetch(API_BASE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
     if (!resContent.ok) throw new Error('获取文件列表失败');
     const dataContent = await resContent.json();
-    
+
     allFilesData = (Array.isArray(dataContent) ? dataContent : []).filter(f =>
       f.type === 'file' && (isImage(f.name) || isAudio(f.name))
     );
@@ -938,31 +1082,27 @@ async function loadGallery() {
       gallery.innerHTML = '';
       emptyTip.style.display = 'block';
       emptyTip.innerHTML = '<span class="big">📭</span>暂无文件，上传后会显示在这里';
+      $('fillDatesBtn').style.display = 'none';
       return;
     }
 
-    // 2. 动态生成后缀分类按钮
-    updateTypeFilters();
+    // 2. ⭐ 从 _dates.json 读取时间（这是权威时间源）
+    const { data: datesData } = await loadDatesJson();
+    globalFileDates = datesData || {};
 
-    // 3. 获取提交记录（获取完整时间）
-    const resCommits = await fetch(`${API_COMMITS}?sha=${CONFIG.branch}&per_page=1000&t=${Date.now()}`, { headers: getHeaders() });
-    globalFileDates = {};
-    if (resCommits.ok) {
-      const dataCommits = await resCommits.json();
-      dataCommits.forEach(commit => {
-        // 提取完整日期时间，例如 2023-10-27T14:30:15Z
-        const fullDateStr = commit.commit.author.date; 
-        if (commit.files) {
-          commit.files.forEach(f => {
-            if (!globalFileDates[f.filename]) {
-              globalFileDates[f.filename] = fullDateStr;
-            }
-          });
-        }
-      });
+    // 3. 检查缺失时间的文件（老文件）
+    const missing = allFilesData.filter(f => !globalFileDates[f.name]);
+    if (missing.length > 0) {
+      $('fillDatesBtn').style.display = 'inline-block';
+      $('fillDatesBtn').textContent = `⏱️ 补全历史时间 (${missing.length})`;
+    } else {
+      $('fillDatesBtn').style.display = 'none';
     }
 
-    // 4. 渲染
+    // 4. 动态生成后缀分类按钮
+    updateTypeFilters();
+
+    // 5. 渲染
     renderGalleryFiltered();
 
   } catch (e) {
@@ -976,14 +1116,12 @@ async function loadGallery() {
 // 动态生成后缀分类按钮
 function updateTypeFilters() {
   const container = $('typeFilters');
-  // 统计后缀
   const exts = new Set();
   allFilesData.forEach(f => {
     const match = f.name.match(/\.([a-zA-Z0-9]+)$/);
     if (match) exts.add(match[1].toLowerCase());
   });
 
-  // 排序后缀
   const sortedExts = Array.from(exts).sort();
 
   let html = `<button class="filter-btn ${currentFilterType === 'all' ? 'active' : ''}" data-type="all">全部</button>`;
@@ -992,14 +1130,12 @@ function updateTypeFilters() {
   });
   container.innerHTML = html;
 
-  // 重新绑定点击事件
   container.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentFilterType = e.target.dataset.type;
-      
-      // 当点击分类时，清空搜索和日期，保证能直接看到该分类下的所有结果
+
       $('searchInput').value = '';
       currentSearchKeyword = '';
       $('dateFilter').value = '';
@@ -1019,15 +1155,10 @@ function renderGalleryFiltered() {
   // 1. 过滤数据
   let filteredFiles = allFilesData.filter(f => {
     const fileExt = (f.name.match(/\.([a-zA-Z0-9]+)$/) || ['', ''])[1].toLowerCase();
-    
-    // 后缀匹配
     const matchType = currentFilterType === 'all' || fileExt === currentFilterType;
-    // 关键字匹配
     const matchKeyword = f.name.toLowerCase().includes(currentSearchKeyword.toLowerCase());
-    // 日期匹配 (取日期部分进行比较)
-    const fileDate = globalFileDates[f.name] ? globalFileDates[f.name].split('T')[0] : ''; 
+    const fileDate = globalFileDates[f.name] ? globalFileDates[f.name].split('T')[0] : '';
     const matchDate = currentFilterDate === '' || fileDate === currentFilterDate;
-    
     return matchType && matchKeyword && matchDate;
   });
 
@@ -1044,23 +1175,27 @@ function renderGalleryFiltered() {
   const groups = {};
   filteredFiles.forEach(f => {
     const fullDate = globalFileDates[f.name];
-    const dateOnly = fullDate ? fullDate.split('T')[0] : '更早之前';
+    const dateOnly = fullDate ? fullDate.split('T')[0] : '未知日期';
     if (!groups[dateOnly]) groups[dateOnly] = [];
     groups[dateOnly].push(f);
   });
 
-  // 3. 排序日期（降序）
-  const sortedDates = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+  // 3. 排序日期（降序，"未知日期"放最后）
+  const sortedDates = Object.keys(groups).sort((a, b) => {
+    if (a === '未知日期') return 1;
+    if (b === '未知日期') return -1;
+    return b.localeCompare(a);
+  });
 
   // 4. 渲染 HTML
   let html = '';
   sortedDates.forEach((date, index) => {
     const isSearching = currentSearchKeyword !== '' || currentFilterType !== 'all' || currentFilterDate !== '';
-    const isOpen = (index === 0 || isSearching || date === '更早之前') ? 'open' : '';
+    const isOpen = (index === 0 || isSearching || date === '未知日期') ? 'open' : '';
     const count = groups[date].length;
-    
+
     let displayDate = date;
-    if (date !== '更早之前') {
+    if (date !== '未知日期') {
       const parts = date.split('-');
       displayDate = `${parts[0]}年${parts[1]}月${parts[2]}日`;
     }
@@ -1108,14 +1243,15 @@ function renderCard(file) {
   const url = RAW_BASE + encodeURIComponent(name);
   const img = isImage(name);
 
-  // 格式化时间
+  // 格式化时间（转本地时间，精确到秒）
   const fullDate = globalFileDates[name];
   let timeDisplay = '未知时间';
   if (fullDate) {
     const d = new Date(fullDate);
-    // 转换为本地时间，格式：YYYY-MM-DD HH:mm:ss
-    const pad = n => String(n).padStart(2, '0');
-    timeDisplay = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    if (!isNaN(d.getTime())) {
+      const pad = n => String(n).padStart(2, '0');
+      timeDisplay = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
   }
 
   const preview = img
@@ -1130,7 +1266,10 @@ function renderCard(file) {
       ${preview}
       <div class="item-body">
         <div class="item-title-row">
-          <div class="item-name" title="${name}">${name}</div>
+          <div class="item-name" title="点击改名">
+            <span class="name-text">${name}</span>
+            <span class="edit-icon">✏️</span>
+          </div>
           <div class="item-time">🕒 ${timeDisplay}</div>
         </div>
         <div class="link-row">
@@ -1164,6 +1303,10 @@ function bindCards() {
     const previewImg = card.querySelector('.item-preview img');
     if (previewImg) previewImg.onclick = () => cropGalleryImage(name, url);
 
+    // ⭐ 点击文件名 → 弹出改名框
+    const nameEl = card.querySelector('.item-name');
+    if (nameEl) nameEl.onclick = () => openRenameModal(name, sha);
+
     card.querySelector('.delete-btn').onclick = async () => {
       if (!confirm(`确定删除「${name}」吗？`)) return;
       if (!getToken()) return toast('请先设置 Token', 'error');
@@ -1173,8 +1316,10 @@ function bindCards() {
           body: JSON.stringify({ message: `delete: ${name}`, sha: sha, branch: CONFIG.branch })
         });
         if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `HTTP ${res.status}`); }
+        // ⭐ 同步删除时间记录
+        await deleteFileDate(name);
         toast(`「${name}」已删除`, 'success');
-        loadGallery(); 
+        loadGallery();
       } catch (e) { toast('删除失败：' + e.message, 'error'); }
     };
   });
@@ -1195,6 +1340,169 @@ function cropGalleryImage(name, url) {
     }
   });
 }
+
+/* ==================== 改名功能 ==================== */
+let renamingFile = null;
+
+function openRenameModal(name, sha) {
+  renamingFile = { name, sha };
+  const input = $('renameInput');
+  input.value = name;
+  $('renameModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    input.focus();
+    // 选中文件名主体（不选后缀），方便直接输入新名字
+    const ext = (name.match(/\.\w+$/) || [''])[0];
+    input.setSelectionRange(0, name.length - ext.length);
+  }, 100);
+}
+
+function closeRenameModal() {
+  $('renameModal').classList.remove('show');
+  document.body.style.overflow = '';
+  renamingFile = null;
+}
+
+$('renameCancelBtn').onclick = closeRenameModal;
+
+$('renameConfirmBtn').onclick = async () => {
+  if (!renamingFile) return;
+  const { name: oldName, sha: oldSha } = renamingFile;
+  const newName = $('renameInput').value.trim();
+
+  if (!newName) return toast('请输入新文件名', 'error');
+  if (newName === oldName) { closeRenameModal(); return; }
+  if (existingNames.has(newName)) return toast('新名字已存在，请换一个', 'error');
+
+  // 后缀检查
+  const oldExt = (oldName.match(/\.\w+$/) || [''])[0].toLowerCase();
+  const newExt = (newName.match(/\.\w+$/) || [''])[0].toLowerCase();
+  if (oldExt !== newExt) {
+    if (!confirm(`⚠️ 后缀将从「${oldExt || '无'}」改为「${newExt || '无'}」，可能影响显示，确定继续？`)) return;
+  }
+
+  $('renameConfirmBtn').disabled = true;
+  toast('正在重命名…');
+
+  try {
+    // 1. 获取原文件内容（base64）
+    const res = await fetch(API_BASE + encodeURIComponent(oldName) + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
+    if (!res.ok) throw new Error('读取原文件失败');
+    const data = await res.json();
+
+    let base64Content = '';
+    if (data.content && data.encoding === 'base64') {
+      base64Content = data.content.replace(/\s/g, '');
+    } else if (data.download_url) {
+      // 大文件兜底：通过 download_url 下载
+      const rawRes = await fetch(data.download_url + `?t=${Date.now()}`, { headers: getHeaders() });
+      if (!rawRes.ok) throw new Error('下载原文件失败');
+      const buf = await rawRes.arrayBuffer();
+      base64Content = arrayBufferToBase64(buf);
+    } else {
+      throw new Error('无法读取文件内容');
+    }
+
+    // 2. 上传新文件
+    const resPut = await fetch(API_BASE + encodeURIComponent(newName), {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        message: `rename: ${oldName} → ${newName}`,
+        content: base64Content,
+        branch: CONFIG.branch
+      })
+    });
+    if (!resPut.ok) {
+      const err = await resPut.json().catch(() => ({}));
+      throw new Error(err.message || '上传新文件失败');
+    }
+
+    // 3. 删除旧文件
+    const resDel = await fetch(API_BASE + encodeURIComponent(oldName), {
+      method: 'DELETE',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        message: `rename: remove ${oldName}`,
+        sha: oldSha,
+        branch: CONFIG.branch
+      })
+    });
+    if (!resDel.ok) throw new Error('旧文件删除失败，请手动检查');
+
+    // 4. ⭐ 迁移时间记录（保持原上传时间）
+    try {
+      const { data: dates, sha: dsha } = await loadDatesJson();
+      const oldTime = dates[oldName] || globalFileDates[oldName];
+      delete dates[oldName];
+      dates[newName] = oldTime || new Date().toISOString();
+      await saveDatesJson(dates, dsha);
+    } catch (e) { console.error('迁移时间记录失败', e); }
+
+    toast(`已重命名为「${newName}」✓`, 'success');
+    closeRenameModal();
+    await loadGallery();
+
+  } catch (e) {
+    toast('重命名失败：' + e.message, 'error');
+  } finally {
+    $('renameConfirmBtn').disabled = false;
+  }
+};
+
+/* ==================== 补全历史时间 ==================== */
+$('fillDatesBtn').onclick = async () => {
+  if (!allFilesData.length) return;
+  const missing = allFilesData.filter(f => !globalFileDates[f.name]).map(f => f.name);
+  if (!missing.length) return toast('没有缺失的时间记录', 'success');
+
+  const btn = $('fillDatesBtn');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+
+  try {
+    const { data, sha } = await loadDatesJson();
+    let ok = 0, fail = 0;
+
+    for (let i = 0; i < missing.length; i++) {
+      const name = missing[i];
+      btn.textContent = `补全中… ${i + 1}/${missing.length}`;
+
+      try {
+        // 查这个文件的最新提交记录
+        const res = await fetch(
+          `${API_COMMITS}?path=${encodeURIComponent(name)}&sha=${CONFIG.branch}&per_page=1&t=${Date.now()}`,
+          { headers: getHeaders() }
+        );
+        if (res.ok) {
+          const arr = await res.json();
+          if (arr.length > 0) {
+            data[name] = arr[0].commit.author.date;
+            ok++;
+          } else fail++;
+        } else fail++;
+      } catch (e) { fail++; }
+
+      // 每 5 个暂停一下，避免触发 GitHub 限速
+      if (i % 5 === 4) await new Promise(r => setTimeout(r, 500));
+    }
+
+    if (ok > 0) {
+      await saveDatesJson(data, sha);
+      toast(`补全完成：成功 ${ok} 个${fail ? `，失败 ${fail} 个` : ''}`, fail ? '' : 'success');
+      await loadGallery();
+    } else {
+      toast(`补全失败：${fail} 个文件都没有找到提交记录`, 'error');
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  } catch (e) {
+    toast('补全失败：' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+};
 
 /* ==================== 刷新 ==================== */
 $('refreshBtn').onclick = () => {
