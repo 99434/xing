@@ -67,7 +67,7 @@ body{
 }
 .card h2{
   font-size:.95rem; margin-bottom:16px; color:var(--text);
-  display:flex; align-items:center; gap:8px; font-weight:700;
+  display:flex; align-items:center; gap:8px; font-weight:700; flex-wrap:wrap;
 }
 .card h2 .dot{width:8px; height:8px; border-radius:50%; background:var(--grad)}
 /* ===== Token ===== */
@@ -113,7 +113,71 @@ body{
 /* ===== 进度 ===== */
 .progress-wrap{height:8px; background:#f3f0fa; border-radius:4px; margin-top:16px; overflow:hidden; display:none}
 .progress-bar{height:100%; width:0; background:var(--grad); border-radius:4px; transition:width .3s}
-/* ===== 图库 ===== */
+
+/* ===== 图库：搜索、筛选与日期 ===== */
+.filter-bar {
+  display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.search-box {
+  flex: 1; min-width: 200px; position: relative;
+}
+.search-box input {
+  width: 100%; padding: 10px 16px 10px 36px; border: 2px solid var(--border);
+  border-radius: 12px; font-size: 0.9rem; outline: none; transition: border .2s; font-family: inherit;
+}
+.search-box input:focus { border-color: var(--primary); }
+.search-box svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; fill: #a8a3b8;
+}
+
+/* 顶部右侧：动态后缀分类 */
+.type-filters {
+  display: flex; gap: 6px; background: #f3f0fa; padding: 4px; border-radius: 12px;
+  overflow-x: auto; white-space: nowrap; max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+.type-filters::-webkit-scrollbar { display: none; }
+.filter-btn {
+  border: none; background: transparent; padding: 8px 16px; border-radius: 9px;
+  font-size: 0.85rem; font-weight: 600; color: var(--muted); cursor: pointer;
+  transition: all 0.2s; text-transform: uppercase;
+}
+.filter-btn:hover { color: var(--primary); }
+.filter-btn.active { background: #fff; color: var(--primary-dark); box-shadow: 0 2px 8px rgba(139,92,246,.15); }
+
+/* 日期筛选栏 */
+.date-filter-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  background: #fdfbff; padding: 10px 16px; border-radius: 12px; border: 1px dashed #d8ccf5;
+}
+.date-label { font-size: 0.85rem; font-weight: 600; color: var(--primary-dark); }
+.date-input {
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 0.9rem; color: var(--text); outline: none;
+  background: #fff; cursor: pointer;
+}
+.date-input:focus { border-color: var(--primary); }
+
+/* ===== 图库：日期分组折叠 ===== */
+.gallery-wrapper { display: flex; flex-direction: column; gap: 16px; }
+.date-group {
+  background: #fff; border-radius: 16px; box-shadow: var(--shadow);
+  border: 1px solid rgba(139,92,246,.06); overflow: hidden; transition: all 0.3s;
+}
+.date-group summary {
+  padding: 16px 20px; font-weight: 700; font-size: 0.95rem; color: var(--primary-dark);
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(to right, #faf5ff, #fff); user-select: none; list-style: none;
+}
+.date-group summary::-webkit-details-marker { display: none; }
+.date-group summary::after {
+  content: '❯'; color: var(--primary); font-size: 0.9rem; transition: transform 0.3s;
+}
+.date-group[open] summary::after { transform: rotate(90deg); }
+.date-group[open] summary { border-bottom: 1px solid var(--border); }
+.date-group .gallery { padding: 18px; }
+
 .gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px}
 .item-card{
   background:#fff; border-radius:18px; overflow:hidden; display:flex; flex-direction:column;
@@ -134,14 +198,20 @@ body{
 }
 .item-preview:hover .crop-hint{opacity:1}
 .item-body{padding:14px; display:flex; flex-direction:column; gap:10px}
-.item-name{font-size:.8rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+/* 文件名与时间 */
+.item-title-row { display: flex; flex-direction: column; gap: 2px; }
+.item-name{font-size:.8rem; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.item-time{font-size:.7rem; color:#a8a3b8; font-family:monospace;}
+
 .link-row{display:flex; gap:6px}
 .link-row input{
   flex:1; min-width:0; padding:8px 10px; border:1px solid var(--border);
   border-radius:9px; font-size:.72rem; color:#555; outline:none; font-family:inherit;
 }
 .action-row{display:flex; gap:6px; flex-wrap:wrap}
-/* ===== Toast ===== */
+
+/* ===== Toast & 空状态 ===== */
 .toast{
   position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px);
   background:#1e1b4b; color:#fff; padding:14px 26px; border-radius:14px;
@@ -151,9 +221,9 @@ body{
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
 .toast.error{background:#dc2626}
 .toast.success{background:#10b981}
-/* ===== 空状态 ===== */
 .empty-tip{text-align:center; color:#c4bdd6; padding:50px 0; font-size:.9rem}
 .empty-tip .big{font-size:2.4rem; display:block; margin-bottom:10px}
+
 /* ===== 裁剪模态框 ===== */
 .crop-modal{
   position:fixed; inset:0; background:rgba(15,10,35,.94); z-index:9999;
@@ -208,6 +278,7 @@ body{
 .ratio-btn.active{background:var(--grad); color:#fff; box-shadow:0 4px 14px rgba(236,72,153,.4)}
 .zoom-slider{flex:1; min-width:140px; accent-color:var(--pink); height:6px}
 .crop-actions{display:flex; justify-content:flex-end; gap:10px}
+
 /* ===== 响应式：平板 / 手机 ===== */
 @media (max-width:768px){
   .container{padding:16px 12px 40px}
@@ -242,6 +313,14 @@ body{
   .ratio-btn{padding:8px 12px; font-size:.75rem}
   .crop-actions .btn{flex:1}
   .desktop-only{display:none}
+  .date-group summary{padding: 14px 16px;}
+  .date-group .gallery{padding: 12px;}
+  .filter-bar { flex-direction: column; }
+  .search-box { width: 100%; }
+  .search-box input { font-size:16px; }
+  .date-filter-row { flex-wrap: wrap; }
+  .date-input { flex: 1; font-size:16px; width: 100%; }
+  #clearDateBtn { width: 100%; }
 }
 @media (max-width:380px){
   .header h1{font-size:1rem}
@@ -255,7 +334,7 @@ body{
 <div class="header">
   <div>
     <h1>🖼️ 我的 GitHub 图床</h1>
-    <div class="sub">多图上传 · 在线裁剪 · 一键复制外链</div>
+    <div class="sub">多图上传 · 在线裁剪 · 智能搜索</div>
   </div>
   <button class="btn btn-white" id="refreshBtn">刷新图库</button>
 </div>
@@ -296,8 +375,32 @@ body{
 
   <!-- 图库 -->
   <div class="card">
-    <h2><span class="dot"></span>图库 <span style="font-weight:400;color:#a8a3b8;font-size:.8rem;margin-left:auto" id="galleryCount"></span></h2>
-    <div class="gallery" id="gallery"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <h2 style="margin-bottom:0;"><span class="dot"></span>图库 <span style="font-weight:400;color:#a8a3b8;font-size:.8rem;" id="galleryCount"></span></h2>
+      
+      <!-- 右上角：动态后缀分类 -->
+      <div class="type-filters" id="typeFilters">
+        <button class="filter-btn active" data-type="all">全部</button>
+      </div>
+    </div>
+    
+    <!-- 搜索与日期筛选栏 -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="searchInput" placeholder="搜索文件名..." autocomplete="off">
+      </div>
+    </div>
+
+    <div class="date-filter-row">
+      <span class="date-label">📅 按日期筛选：</span>
+      <input type="date" id="dateFilter" class="date-input">
+      <button class="btn btn-ghost btn-sm" id="clearDateBtn" style="display:none;">清除日期</button>
+    </div>
+
+    <!-- 按时间折叠的容器 -->
+    <div class="gallery-wrapper" id="gallery"></div>
+    
     <div class="empty-tip" id="emptyTip"><span class="big">📭</span>暂无文件，上传后会显示在这里</div>
   </div>
 
@@ -355,6 +458,7 @@ const CONFIG = {
 };
 
 const API_BASE  = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/`;
+const API_COMMITS = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/commits`;
 const TOKEN_KEY = 'github_imghost_token';
 const RAW_BASE  = `https://cdn.jsdelivr.net/gh/${CONFIG.username}/${CONFIG.repo}@${CONFIG.branch}/`;
 
@@ -391,7 +495,6 @@ function fmtSize(bytes) {
   return (bytes / 1048576).toFixed(2) + ' MB';
 }
 
-/* 跨端复制：优先剪贴板 API，失败降级 */
 function copyText(text) {
   if (navigator.clipboard && window.isSecureContext) {
     return navigator.clipboard.writeText(text);
@@ -421,6 +524,13 @@ let pendingFiles = [];
 let existingNames = new Set();
 let uid = 0;
 
+// 搜索、类型、日期筛选状态
+let allFilesData = []; 
+let globalFileDates = {}; // 存储完整的 YYYY-MM-DDTHH:mm:ssZ
+let currentFilterType = 'all';
+let currentSearchKeyword = '';
+let currentFilterDate = ''; 
+
 /* ==================== Token 管理 ==================== */
 $('saveTokenBtn').onclick = () => {
   const t = $('tokenInput').value.trim();
@@ -436,7 +546,6 @@ $('clearTokenBtn').onclick = () => {
   toast('Token 已清除');
 };
 
-/* 手机端：一键从剪贴板粘贴 Token */
 $('pasteTokenBtn').onclick = async () => {
   try {
     const text = await navigator.clipboard.readText();
@@ -545,34 +654,24 @@ $('clearPendingBtn').onclick = () => {
 
 /* ==================== 裁剪器 ==================== */
 const crop = {
-  img: null,
-  imgX: 0, imgY: 0, scale: 1, baseScale: 1,
-  stageW: 0, stageH: 0,
-  box: { x: 0, y: 0, w: 0, h: 0 },
-  ratio: null,
-  onConfirm: null,
-  outName: ''
+  img: null, imgX: 0, imgY: 0, scale: 1, baseScale: 1,
+  stageW: 0, stageH: 0, box: { x: 0, y: 0, w: 0, h: 0 },
+  ratio: null, onConfirm: null, outName: ''
 };
-
-const cropModal = $('cropModal');
-const cropStage = $('cropStage');
-const cropCanvas = $('cropCanvas');
-const cropBoxEl = $('cropBox');
+const cropModal = $('cropModal'), cropStage = $('cropStage');
+const cropCanvas = $('cropCanvas'), cropBoxEl = $('cropBox');
 const cropCtx = cropCanvas.getContext('2d');
 
 function openCropper(source, opts) {
-  crop.outName = opts.fileName;
-  crop.onConfirm = opts.onConfirm;
+  crop.outName = opts.fileName; crop.onConfirm = opts.onConfirm;
   crop.ratio = null;
   document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b.dataset.ratio === 'free'));
   $('cropZoom').value = 100;
-
   cropModal.classList.add('show');
   document.body.style.overflow = 'hidden';
 
   const img = new Image();
   img.crossOrigin = 'anonymous';
-
   const isFile = source instanceof File || source instanceof Blob;
   const url = isFile ? URL.createObjectURL(source) : source;
 
@@ -593,8 +692,7 @@ function openCropper(source, opts) {
 function closeCropper() {
   cropModal.classList.remove('show');
   document.body.style.overflow = '';
-  crop.img = null;
-  crop.onConfirm = null;
+  crop.img = null; crop.onConfirm = null;
 }
 
 $('cropClose').onclick = closeCropper;
@@ -602,11 +700,8 @@ $('cropCancel').onclick = closeCropper;
 
 function setupCrop(img) {
   crop.img = img;
-
   const rect = cropStage.getBoundingClientRect();
-  crop.stageW = rect.width;
-  crop.stageH = rect.height;
-
+  crop.stageW = rect.width; crop.stageH = rect.height;
   const dpr = window.devicePixelRatio || 1;
   cropCanvas.width  = crop.stageW * dpr;
   cropCanvas.height = crop.stageH * dpr;
@@ -615,23 +710,13 @@ function setupCrop(img) {
   cropCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   const fit = Math.min(crop.stageW / img.width, crop.stageH / img.height) * 0.9;
-  crop.baseScale = fit;
-  crop.scale = fit;
+  crop.baseScale = fit; crop.scale = fit;
   crop.imgX = (crop.stageW - img.width * fit) / 2;
   crop.imgY = (crop.stageH - img.height * fit) / 2;
-
-  const dw = img.width * fit;
-  const dh = img.height * fit;
-  const bw = dw * 0.7;
-  const bh = dh * 0.7;
-  crop.box = {
-    x: crop.imgX + (dw - bw) / 2,
-    y: crop.imgY + (dh - bh) / 2,
-    w: bw, h: bh
-  };
-
-  drawCanvas();
-  syncBoxEl();
+  const dw = img.width * fit, dh = img.height * fit;
+  const bw = dw * 0.7, bh = dh * 0.7;
+  crop.box = { x: crop.imgX + (dw - bw) / 2, y: crop.imgY + (dh - bh) / 2, w: bw, h: bh };
+  drawCanvas(); syncBoxEl();
 }
 
 function drawCanvas() {
@@ -643,26 +728,21 @@ function drawCanvas() {
 
 function syncBoxEl() {
   const b = crop.box;
-  cropBoxEl.style.left   = b.x + 'px';
-  cropBoxEl.style.top    = b.y + 'px';
-  cropBoxEl.style.width  = b.w + 'px';
-  cropBoxEl.style.height = b.h + 'px';
+  cropBoxEl.style.left = b.x + 'px'; cropBoxEl.style.top = b.y + 'px';
+  cropBoxEl.style.width = b.w + 'px'; cropBoxEl.style.height = b.h + 'px';
 }
 
 function visibleBounds() {
   const { img, imgX, imgY, scale, stageW, stageH } = crop;
   return {
-    minX: Math.max(0, imgX),
-    minY: Math.max(0, imgY),
+    minX: Math.max(0, imgX), minY: Math.max(0, imgY),
     maxX: Math.min(stageW, imgX + img.width * scale),
     maxY: Math.min(stageH, imgY + img.height * scale)
   };
 }
 
 function clampBox() {
-  const b = crop.box;
-  const vb = visibleBounds();
-  const minW = 40, minH = 40;
+  const b = crop.box, vb = visibleBounds(), minW = 40, minH = 40;
   b.w = Math.max(minW, Math.min(b.w, vb.maxX - vb.minX));
   b.h = Math.max(minH, Math.min(b.h, vb.maxY - vb.minY));
   b.x = Math.max(vb.minX, Math.min(b.x, vb.maxX - b.w));
@@ -670,161 +750,94 @@ function clampBox() {
 }
 
 let drag = null;
-
 cropBoxEl.addEventListener('pointerdown', e => {
   const handle = e.target.dataset.handle;
-  drag = {
-    mode: handle ? 'resize' : 'move',
-    handle: handle || '',
-    startX: e.clientX,
-    startY: e.clientY,
-    box: { ...crop.box }
-  };
-  e.preventDefault();
-  e.stopPropagation();
+  drag = { mode: handle ? 'resize' : 'move', handle: handle || '', startX: e.clientX, startY: e.clientY, box: { ...crop.box } };
+  e.preventDefault(); e.stopPropagation();
 });
-
 window.addEventListener('pointermove', e => {
   if (!drag) return;
-  const dx = e.clientX - drag.startX;
-  const dy = e.clientY - drag.startY;
-
-  if (drag.mode === 'move') {
-    crop.box.x = drag.box.x + dx;
-    crop.box.y = drag.box.y + dy;
-    clampBox();
-  } else {
-    resizeBox(drag.handle, dx, dy, drag.box);
-  }
-  syncBoxEl();
-  drawCanvas();
+  const dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
+  if (drag.mode === 'move') { crop.box.x = drag.box.x + dx; crop.box.y = drag.box.y + dy; clampBox(); }
+  else { resizeBox(drag.handle, dx, dy, drag.box); }
+  syncBoxEl(); drawCanvas();
 });
-
 window.addEventListener('pointerup', () => { drag = null; });
 window.addEventListener('pointercancel', () => { drag = null; });
 
 function resizeBox(handle, dx, dy, start) {
-  let { x, y, w, h } = start;
-  const minSize = 40;
-
+  let { x, y, w, h } = start; const minSize = 40;
   if (handle.includes('e')) w = start.w + dx;
   if (handle.includes('w')) w = start.w - dx;
   if (handle.includes('s')) h = start.h + dy;
   if (handle.includes('n')) h = start.h - dy;
-
-  if (w < minSize) w = minSize;
-  if (h < minSize) h = minSize;
-
+  if (w < minSize) w = minSize; if (h < minSize) h = minSize;
   if (crop.ratio) {
-    const r = crop.ratio;
-    const isCorner = handle.length === 2;
-    if (isCorner) {
-      h = w / r;
-      if (h < minSize) { h = minSize; w = h * r; }
-    } else if (handle === 'n' || handle === 's') {
-      w = h * r;
-    } else {
-      h = w / r;
-    }
+    const r = crop.ratio, isCorner = handle.length === 2;
+    if (isCorner) { h = w / r; if (h < minSize) { h = minSize; w = h * r; } }
+    else if (handle === 'n' || handle === 's') { w = h * r; }
+    else { h = w / r; }
   }
-
   if (handle.includes('w')) x = start.x + start.w - w;
   if (handle.includes('n')) y = start.y + start.h - h;
-
-  crop.box = { x, y, w, h };
-  clampBox();
+  crop.box = { x, y, w, h }; clampBox();
 }
 
 $('ratioGroup').addEventListener('click', e => {
-  const btn = e.target.closest('.ratio-btn');
-  if (!btn) return;
+  const btn = e.target.closest('.ratio-btn'); if (!btn) return;
   document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-
-  const r = btn.dataset.ratio;
-  crop.ratio = r === 'free' ? null : parseFloat(r);
-
+  const r = btn.dataset.ratio; crop.ratio = r === 'free' ? null : parseFloat(r);
   if (crop.ratio) {
-    const b = crop.box;
-    const cx = b.x + b.w / 2;
-    const cy = b.y + b.h / 2;
-    let w = b.w;
-    let h = w / crop.ratio;
+    const b = crop.box, cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    let w = b.w, h = w / crop.ratio;
     if (h > b.h) { h = b.h; w = h * crop.ratio; }
     crop.box = { x: cx - w / 2, y: cy - h / 2, w, h };
-    clampBox();
-    syncBoxEl();
-    drawCanvas();
+    clampBox(); syncBoxEl(); drawCanvas();
   }
 });
 
 $('cropZoom').oninput = e => {
   if (!crop.img) return;
   const newScale = crop.baseScale * (parseInt(e.target.value) / 100);
-  const cx = crop.box.x + crop.box.w / 2;
-  const cy = crop.box.y + crop.box.h / 2;
-  const ix = (cx - crop.imgX) / crop.scale;
-  const iy = (cy - crop.imgY) / crop.scale;
-  crop.imgX = cx - ix * newScale;
-  crop.imgY = cy - iy * newScale;
-  crop.scale = newScale;
-  clampBox();
-  syncBoxEl();
-  drawCanvas();
+  const cx = crop.box.x + crop.box.w / 2, cy = crop.box.y + crop.box.h / 2;
+  const ix = (cx - crop.imgX) / crop.scale, iy = (cy - crop.imgY) / crop.scale;
+  crop.imgX = cx - ix * newScale; crop.imgY = cy - iy * newScale;
+  crop.scale = newScale; clampBox(); syncBoxEl(); drawCanvas();
 };
 
 $('cropReset').onclick = () => {
   if (!crop.img) return;
-  $('cropZoom').value = 100;
-  crop.ratio = null;
+  $('cropZoom').value = 100; crop.ratio = null;
   document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b.dataset.ratio === 'free'));
-  const img = crop.img;
-  const fit = crop.baseScale;
+  const img = crop.img, fit = crop.baseScale;
   crop.scale = fit;
   crop.imgX = (crop.stageW - img.width * fit) / 2;
   crop.imgY = (crop.stageH - img.height * fit) / 2;
   const dw = img.width * fit, dh = img.height * fit;
-  crop.box = {
-    x: crop.imgX + dw * 0.15,
-    y: crop.imgY + dh * 0.15,
-    w: dw * 0.7,
-    h: dh * 0.7
-  };
-  clampBox();
-  syncBoxEl();
-  drawCanvas();
+  crop.box = { x: crop.imgX + dw * 0.15, y: crop.imgY + dh * 0.15, w: dw * 0.7, h: dh * 0.7 };
+  clampBox(); syncBoxEl(); drawCanvas();
 };
 
 $('cropConfirm').onclick = () => {
   if (!crop.img) return;
   const { img, imgX, imgY, scale, box } = crop;
-
-  let sx = (box.x - imgX) / scale;
-  let sy = (box.y - imgY) / scale;
-  let sw = box.w / scale;
-  let sh = box.h / scale;
-
-  sx = Math.max(0, Math.min(img.width - 1, sx));
-  sy = Math.max(0, Math.min(img.height - 1, sy));
-  sw = Math.min(img.width - sx, sw);
-  sh = Math.min(img.height - sy, sh);
-
+  let sx = (box.x - imgX) / scale, sy = (box.y - imgY) / scale;
+  let sw = box.w / scale, sh = box.h / scale;
+  sx = Math.max(0, Math.min(img.width - 1, sx)); sy = Math.max(0, Math.min(img.height - 1, sy));
+  sw = Math.min(img.width - sx, sw); sh = Math.min(img.height - sy, sh);
   const out = document.createElement('canvas');
-  out.width  = Math.max(1, Math.round(sw));
-  out.height = Math.max(1, Math.round(sh));
+  out.width  = Math.max(1, Math.round(sw)); out.height = Math.max(1, Math.round(sh));
   out.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
-
   const name = crop.outName;
   const ext = (name.match(/\.\w+$/) || ['.png'])[0].toLowerCase();
   const keepPng = ['.png', '.svg', '.gif', '.bmp', '.ico'].includes(ext);
   const mime = keepPng ? 'image/png' : 'image/jpeg';
-
   out.toBlob(blob => {
     if (!blob) return toast('裁剪失败', 'error');
     const newExt = keepPng ? '.png' : '.jpg';
     const base = name.replace(/\.\w+$/, '').replace(/_crop$/, '');
     const outName = `${base}_crop${newExt}`;
-
     if (crop.onConfirm) crop.onConfirm(blob, outName);
     closeCropper();
   }, mime, 0.92);
@@ -836,11 +849,8 @@ function cropPending(item) {
     onConfirm: (blob, outName) => {
       const newFile = new File([blob], outName, { type: blob.type });
       URL.revokeObjectURL(item.previewUrl);
-      item.file = newFile;
-      item.previewUrl = URL.createObjectURL(newFile);
-      item.cropped = true;
-      renderPending();
-      toast('裁剪完成，点击「开始上传」即可上传', 'success');
+      item.file = newFile; item.previewUrl = URL.createObjectURL(newFile); item.cropped = true;
+      renderPending(); toast('裁剪完成，点击「开始上传」即可上传', 'success');
     }
   });
 }
@@ -850,12 +860,8 @@ async function ensureUniqueName(name) {
   if (!existingNames.has(name)) return name;
   const ext = (name.match(/\.\w+$/) || [''])[0];
   const base = name.slice(0, name.length - ext.length);
-  let i = 1;
-  let candidate = `${base}_${i}${ext}`;
-  while (existingNames.has(candidate)) {
-    i++;
-    candidate = `${base}_${i}${ext}`;
-  }
+  let i = 1; let candidate = `${base}_${i}${ext}`;
+  while (existingNames.has(candidate)) { i++; candidate = `${base}_${i}${ext}`; }
   return candidate;
 }
 
@@ -863,25 +869,14 @@ async function uploadOne(file) {
   const base64 = await new Promise((res, rej) => {
     const r = new FileReader();
     r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(file);
+    r.onerror = rej; r.readAsDataURL(file);
   });
-
   const finalName = await ensureUniqueName(file.name);
   const res = await fetch(API_BASE + encodeURIComponent(finalName), {
-    method: 'PUT',
-    headers: getHeaders(),
-    body: JSON.stringify({
-      message: `upload: ${finalName}`,
-      content: base64,
-      branch: CONFIG.branch
-    })
+    method: 'PUT', headers: getHeaders(),
+    body: JSON.stringify({ message: `upload: ${finalName}`, content: base64, branch: CONFIG.branch })
   });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `HTTP ${res.status}`);
-  }
+  if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `HTTP ${res.status}`); }
   existingNames.add(finalName);
   return finalName;
 }
@@ -890,82 +885,86 @@ $('uploadAllBtn').onclick = async () => {
   if (!getToken()) return toast('请先设置 GitHub Token', 'error');
   const items = [...pendingFiles];
   if (!items.length) return;
-
-  const bar = $('progressBar');
-  const wrap = $('progressWrap');
-  wrap.style.display = 'block';
-  $('uploadAllBtn').disabled = true;
-
+  const bar = $('progressBar'), wrap = $('progressWrap');
+  wrap.style.display = 'block'; $('uploadAllBtn').disabled = true;
   let ok = 0, fail = 0;
-
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     bar.style.width = Math.round((i / items.length) * 100) + '%';
     toast(`正在上传 ${item.file.name}（${i + 1}/${items.length}）…`);
-
-    try {
-      await uploadOne(item.file);
-      ok++;
-    } catch (e) {
-      fail++;
-      console.error('上传失败:', item.file.name, e);
-    }
-
+    try { await uploadOne(item.file); ok++; }
+    catch (e) { fail++; console.error('上传失败:', item.file.name, e); }
     URL.revokeObjectURL(item.previewUrl);
     pendingFiles = pendingFiles.filter(p => p.id !== item.id);
     renderPending();
   }
-
   bar.style.width = '100%';
   setTimeout(() => { wrap.style.display = 'none'; bar.style.width = '0'; }, 700);
   $('uploadAllBtn').disabled = false;
-
   if (fail === 0) toast(`全部 ${ok} 个文件上传成功 ✓`, 'success');
   else toast(`完成：成功 ${ok} 个，失败 ${fail} 个`, 'error');
-
   loadGallery();
 };
 
-/* ==================== 图库 ==================== */
+/* ==================== 图库：搜索、筛选与加载 ==================== */
 async function loadGallery() {
   const gallery = $('gallery');
   const emptyTip = $('emptyTip');
 
   if (!getToken()) {
-    gallery.innerHTML = '';
-    $('galleryCount').textContent = '';
+    gallery.innerHTML = ''; $('galleryCount').textContent = '';
     emptyTip.style.display = 'block';
     emptyTip.innerHTML = '<span class="big">🔑</span>请先在上方设置 GitHub Token';
     return;
   }
 
-  gallery.innerHTML = '<div style="padding:30px;color:#a8a3b8;text-align:center;grid-column:1/-1">正在加载…</div>';
+  gallery.innerHTML = '<div style="padding:30px;color:#a8a3b8;text-align:center;">正在加载图库…</div>';
   emptyTip.style.display = 'none';
 
   try {
-    const res = await fetch(API_BASE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    const files = (Array.isArray(data) ? data : []).filter(f =>
+    // 1. 获取文件列表
+    const resContent = await fetch(API_BASE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
+    if (!resContent.ok) throw new Error('获取文件列表失败');
+    const dataContent = await resContent.json();
+    
+    allFilesData = (Array.isArray(dataContent) ? dataContent : []).filter(f =>
       f.type === 'file' && (isImage(f.name) || isAudio(f.name))
     );
 
-    existingNames = new Set(files.map(f => f.name));
-    $('galleryCount').textContent = files.length ? `共 ${files.length} 个文件` : '';
+    existingNames = new Set(allFilesData.map(f => f.name));
+    $('galleryCount').textContent = allFilesData.length ? `共 ${allFilesData.length} 个文件` : '';
 
-    if (!files.length) {
+    if (!allFilesData.length) {
       gallery.innerHTML = '';
       emptyTip.style.display = 'block';
       emptyTip.innerHTML = '<span class="big">📭</span>暂无文件，上传后会显示在这里';
       return;
     }
 
-    emptyTip.style.display = 'none';
-    gallery.innerHTML = files.map(renderCard).join('');
-    bindCards(files);
+    // 2. 动态生成后缀分类按钮
+    updateTypeFilters();
+
+    // 3. 获取提交记录（获取完整时间）
+    const resCommits = await fetch(`${API_COMMITS}?sha=${CONFIG.branch}&per_page=1000&t=${Date.now()}`, { headers: getHeaders() });
+    globalFileDates = {};
+    if (resCommits.ok) {
+      const dataCommits = await resCommits.json();
+      dataCommits.forEach(commit => {
+        // 提取完整日期时间，例如 2023-10-27T14:30:15Z
+        const fullDateStr = commit.commit.author.date; 
+        if (commit.files) {
+          commit.files.forEach(f => {
+            if (!globalFileDates[f.filename]) {
+              globalFileDates[f.filename] = fullDateStr;
+            }
+          });
+        }
+      });
+    }
+
+    // 4. 渲染
+    renderGalleryFiltered();
+
   } catch (e) {
     gallery.innerHTML = '';
     emptyTip.style.display = 'block';
@@ -974,11 +973,150 @@ async function loadGallery() {
   }
 }
 
+// 动态生成后缀分类按钮
+function updateTypeFilters() {
+  const container = $('typeFilters');
+  // 统计后缀
+  const exts = new Set();
+  allFilesData.forEach(f => {
+    const match = f.name.match(/\.([a-zA-Z0-9]+)$/);
+    if (match) exts.add(match[1].toLowerCase());
+  });
+
+  // 排序后缀
+  const sortedExts = Array.from(exts).sort();
+
+  let html = `<button class="filter-btn ${currentFilterType === 'all' ? 'active' : ''}" data-type="all">全部</button>`;
+  sortedExts.forEach(ext => {
+    html += `<button class="filter-btn ${currentFilterType === ext ? 'active' : ''}" data-type="${ext}">${ext}</button>`;
+  });
+  container.innerHTML = html;
+
+  // 重新绑定点击事件
+  container.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentFilterType = e.target.dataset.type;
+      
+      // 当点击分类时，清空搜索和日期，保证能直接看到该分类下的所有结果
+      $('searchInput').value = '';
+      currentSearchKeyword = '';
+      $('dateFilter').value = '';
+      currentFilterDate = '';
+      $('clearDateBtn').style.display = 'none';
+
+      renderGalleryFiltered();
+    });
+  });
+}
+
+// 核心渲染函数
+function renderGalleryFiltered() {
+  const gallery = $('gallery');
+  const emptyTip = $('emptyTip');
+
+  // 1. 过滤数据
+  let filteredFiles = allFilesData.filter(f => {
+    const fileExt = (f.name.match(/\.([a-zA-Z0-9]+)$/) || ['', ''])[1].toLowerCase();
+    
+    // 后缀匹配
+    const matchType = currentFilterType === 'all' || fileExt === currentFilterType;
+    // 关键字匹配
+    const matchKeyword = f.name.toLowerCase().includes(currentSearchKeyword.toLowerCase());
+    // 日期匹配 (取日期部分进行比较)
+    const fileDate = globalFileDates[f.name] ? globalFileDates[f.name].split('T')[0] : ''; 
+    const matchDate = currentFilterDate === '' || fileDate === currentFilterDate;
+    
+    return matchType && matchKeyword && matchDate;
+  });
+
+  if (!filteredFiles.length) {
+    gallery.innerHTML = '';
+    emptyTip.style.display = 'block';
+    emptyTip.innerHTML = '<span class="big">🔍</span>没有找到符合条件的文件';
+    return;
+  }
+
+  emptyTip.style.display = 'none';
+
+  // 2. 按日期分组
+  const groups = {};
+  filteredFiles.forEach(f => {
+    const fullDate = globalFileDates[f.name];
+    const dateOnly = fullDate ? fullDate.split('T')[0] : '更早之前';
+    if (!groups[dateOnly]) groups[dateOnly] = [];
+    groups[dateOnly].push(f);
+  });
+
+  // 3. 排序日期（降序）
+  const sortedDates = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+
+  // 4. 渲染 HTML
+  let html = '';
+  sortedDates.forEach((date, index) => {
+    const isSearching = currentSearchKeyword !== '' || currentFilterType !== 'all' || currentFilterDate !== '';
+    const isOpen = (index === 0 || isSearching || date === '更早之前') ? 'open' : '';
+    const count = groups[date].length;
+    
+    let displayDate = date;
+    if (date !== '更早之前') {
+      const parts = date.split('-');
+      displayDate = `${parts[0]}年${parts[1]}月${parts[2]}日`;
+    }
+
+    html += `
+      <details class="date-group" ${isOpen}>
+        <summary>
+          <span>📅 ${displayDate}</span>
+          <span style="font-size:0.8rem; font-weight:normal; color:#a8a3b8; margin-right:10px;">(${count}个)</span>
+        </summary>
+        <div class="gallery">
+          ${groups[date].map(renderCard).join('')}
+        </div>
+      </details>
+    `;
+  });
+
+  gallery.innerHTML = html;
+  bindCards();
+}
+
+// 绑定搜索栏
+$('searchInput').addEventListener('input', (e) => {
+  currentSearchKeyword = e.target.value.trim();
+  renderGalleryFiltered();
+});
+
+// 绑定日期筛选
+$('dateFilter').addEventListener('change', (e) => {
+  currentFilterDate = e.target.value;
+  $('clearDateBtn').style.display = currentFilterDate ? 'inline-block' : 'none';
+  renderGalleryFiltered();
+});
+
+$('clearDateBtn').onclick = () => {
+  $('dateFilter').value = '';
+  currentFilterDate = '';
+  $('clearDateBtn').style.display = 'none';
+  renderGalleryFiltered();
+};
+
 function renderCard(file) {
   const name = file.name;
   const sha = file.sha;
   const url = RAW_BASE + encodeURIComponent(name);
   const img = isImage(name);
+
+  // 格式化时间
+  const fullDate = globalFileDates[name];
+  let timeDisplay = '未知时间';
+  if (fullDate) {
+    const d = new Date(fullDate);
+    // 转换为本地时间，格式：YYYY-MM-DD HH:mm:ss
+    const pad = n => String(n).padStart(2, '0');
+    timeDisplay = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
 
   const preview = img
     ? `<div class="item-preview">
@@ -991,7 +1129,10 @@ function renderCard(file) {
     <div class="item-card" data-name="${name}" data-sha="${sha}">
       ${preview}
       <div class="item-body">
-        <div class="item-name" title="${name}">${name}</div>
+        <div class="item-title-row">
+          <div class="item-name" title="${name}">${name}</div>
+          <div class="item-time">🕒 ${timeDisplay}</div>
+        </div>
         <div class="link-row">
           <input type="text" readonly value="${url}" class="link-input">
           <button class="btn btn-ghost btn-sm copy-btn">复制</button>
@@ -1013,50 +1154,28 @@ function bindCards() {
     const url = linkInput.value;
 
     card.querySelector('.copy-btn').onclick = () => {
-      copyText(url)
-        .then(() => toast('链接已复制 ✓', 'success'))
-        .catch(() => {
-          linkInput.select();
-          document.execCommand('copy');
-          toast('链接已复制 ✓', 'success');
-        });
+      copyText(url).then(() => toast('链接已复制 ✓', 'success'))
+        .catch(() => { linkInput.select(); document.execCommand('copy'); toast('链接已复制 ✓', 'success'); });
     };
 
     card.querySelector('.open-btn').onclick = () => window.open(url, '_blank');
-
     const cropBtn = card.querySelector('.crop-btn');
-    if (cropBtn) {
-      cropBtn.onclick = () => cropGalleryImage(name, url);
-    }
-
+    if (cropBtn) cropBtn.onclick = () => cropGalleryImage(name, url);
     const previewImg = card.querySelector('.item-preview img');
-    if (previewImg) {
-      previewImg.onclick = () => cropGalleryImage(name, url);
-    }
+    if (previewImg) previewImg.onclick = () => cropGalleryImage(name, url);
 
     card.querySelector('.delete-btn').onclick = async () => {
       if (!confirm(`确定删除「${name}」吗？`)) return;
       if (!getToken()) return toast('请先设置 Token', 'error');
-
       try {
         const res = await fetch(API_BASE + encodeURIComponent(name), {
-          method: 'DELETE',
-          headers: getHeaders(),
-          body: JSON.stringify({
-            message: `delete: ${name}`,
-            sha: sha,
-            branch: CONFIG.branch
-          })
+          method: 'DELETE', headers: getHeaders(),
+          body: JSON.stringify({ message: `delete: ${name}`, sha: sha, branch: CONFIG.branch })
         });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.message || `HTTP ${res.status}`);
-        }
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `HTTP ${res.status}`); }
         toast(`「${name}」已删除`, 'success');
-        loadGallery();
-      } catch (e) {
-        toast('删除失败：' + e.message, 'error');
-      }
+        loadGallery(); 
+      } catch (e) { toast('删除失败：' + e.message, 'error'); }
     };
   });
 }
@@ -1067,21 +1186,25 @@ function cropGalleryImage(name, url) {
     onConfirm: async (blob, outName) => {
       if (!getToken()) return toast('请先设置 Token', 'error');
       const file = new File([blob], outName, { type: blob.type });
-
       toast('正在上传裁剪后的图片…');
       try {
         const finalName = await uploadOne(file);
         toast(`已上传为「${finalName}」✓`, 'success');
         loadGallery();
-      } catch (e) {
-        toast('上传失败：' + e.message, 'error');
-      }
+      } catch (e) { toast('上传失败：' + e.message, 'error'); }
     }
   });
 }
 
 /* ==================== 刷新 ==================== */
 $('refreshBtn').onclick = () => {
+  $('searchInput').value = '';
+  currentSearchKeyword = '';
+  currentFilterType = 'all';
+  $('dateFilter').value = '';
+  currentFilterDate = '';
+  $('clearDateBtn').style.display = 'none';
+
   loadGallery();
   toast('正在刷新…');
 };
