@@ -231,6 +231,12 @@ body{
 }
 .rename-dialog input:focus{border-color:var(--primary);}
 .rename-hint{font-size:.75rem; color:var(--muted); margin-top:10px; line-height:1.5;}
+.rename-status{
+  font-size:.8rem; color:var(--primary-dark); margin-top:10px; padding:8px 12px;
+  background:#faf5ff; border-radius:8px; border-left:3px solid var(--primary);
+  min-height:0; display:none; line-height:1.5;
+}
+.rename-status.show{display:block;}
 .rename-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:20px;}
 .crop-modal{
   position:fixed; inset:0; background:rgba(15,10,35,.94); z-index:9999;
@@ -418,6 +424,7 @@ body{
     <h3>✏️ 重命名文件</h3>
     <input type="text" id="renameInput" placeholder="输入新文件名" autocomplete="off" autocapitalize="off" spellcheck="false">
     <div class="rename-hint">💡 建议保留原后缀（如 .jpg / .png），避免显示异常。</div>
+    <div class="rename-status" id="renameStatus"></div>
     <div class="rename-actions">
       <button class="btn btn-ghost" id="renameCancelBtn">取消</button>
       <button class="btn btn-grad" id="renameConfirmBtn">确认改名</button>
@@ -463,9 +470,6 @@ body{
 </div>
 
 <script>
-/* ============================================================
- *  配置区
- * ============================================================ */
 const CONFIG = {
   username: '99434',
   repo: 'xing',
@@ -475,6 +479,7 @@ const CONFIG = {
 const API_BASE    = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/`;
 const API_COMMITS = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/commits`;
 const API_GIT     = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/git`;
+const API_REPO    = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}`;
 const TOKEN_KEY   = 'github_imghost_token';
 const RAW_BASE    = `https://cdn.jsdelivr.net/gh/${CONFIG.username}/${CONFIG.repo}@${CONFIG.branch}/`;
 const DATES_FILE  = '_dates.json';
@@ -484,12 +489,12 @@ const $ = id => document.getElementById(id);
 function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
 
 let toastTimer;
-function toast(msg, type = '') {
+function toast(msg, type = '', duration = 2600) {
   const el = $('toast');
   el.textContent = msg;
   el.className = 'toast show ' + type;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.className = 'toast', 3000);
+  toastTimer = setTimeout(() => el.className = 'toast', duration);
 }
 
 function getHeaders() {
@@ -518,28 +523,21 @@ function copyText(text) {
   return new Promise((resolve, reject) => {
     const ta = document.createElement('textarea');
     ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.top = '0';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
+    ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
     try {
       const ok = document.execCommand('copy');
       document.body.removeChild(ta);
       ok ? resolve() : reject(new Error('copy failed'));
     } catch (e) {
-      document.body.removeChild(ta);
-      reject(e);
+      document.body.removeChild(ta); reject(e);
     }
   });
 }
 
-/* UTF-8 安全 Base64 */
 function encodeBase64(str) {
   const bytes = new TextEncoder().encode(str);
-  let binary = '';
-  const chunk = 0x8000;
+  let binary = ''; const chunk = 0x8000;
   for (let i = 0; i < bytes.length; i += chunk) {
     binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
   }
@@ -552,23 +550,8 @@ function decodeBase64(b64) {
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return new TextDecoder().decode(bytes);
 }
-function arrayBufferToBase64(buffer) {
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
-}
-
-/* HTML 属性转义：避免文件名含特殊字符破坏 DOM */
 function escapeAttr(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -661,8 +644,7 @@ fileInput.onchange = () => {
   fileInput.value = '';
 };
 dropZone.addEventListener('dragover', e => {
-  e.preventDefault();
-  dropZone.classList.add('dragover');
+  e.preventDefault(); dropZone.classList.add('dragover');
 });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
 dropZone.addEventListener('drop', e => {
@@ -687,9 +669,7 @@ function renderPending() {
   const list = $('pendingList');
   const bar  = $('uploadBar');
   if (!pendingFiles.length) {
-    list.innerHTML = '';
-    bar.style.display = 'none';
-    return;
+    list.innerHTML = ''; bar.style.display = 'none'; return;
   }
   bar.style.display = 'flex';
   $('uploadAllBtn').textContent = `开始上传（${pendingFiles.length}）`;
@@ -982,7 +962,7 @@ $('uploadAllBtn').onclick = async () => {
   loadGallery();
 };
 
-/* ==================== 图库加载 ==================== */
+/* ==================== 图库加载（并行优化版） ==================== */
 async function loadGallery() {
   const gallery = $('gallery');
   const emptyTip = $('emptyTip');
@@ -999,7 +979,11 @@ async function loadGallery() {
   emptyTip.style.display = 'none';
 
   try {
-    const resContent = await fetch(API_BASE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
+    // ⭐ 并行：拿文件列表 + 拿时间记录
+    const [resContent, datesResult] = await Promise.all([
+      fetch(API_BASE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() }),
+      loadDatesJson()
+    ]);
     if (!resContent.ok) throw new Error('获取文件列表失败');
     const dataContent = await resContent.json();
 
@@ -1018,8 +1002,7 @@ async function loadGallery() {
       return;
     }
 
-    const { data: datesData } = await loadDatesJson();
-    globalFileDates = datesData || {};
+    globalFileDates = datesResult.data || {};
 
     const missing = allFilesData.filter(f => !globalFileDates[f.name]);
     if (missing.length > 0) {
@@ -1058,10 +1041,8 @@ function updateTypeFilters() {
       container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentFilterType = e.target.dataset.type;
-      $('searchInput').value = '';
-      currentSearchKeyword = '';
-      $('dateFilter').value = '';
-      currentFilterDate = '';
+      $('searchInput').value = ''; currentSearchKeyword = '';
+      $('dateFilter').value = ''; currentFilterDate = '';
       $('clearDateBtn').style.display = 'none';
       renderGalleryFiltered();
     });
@@ -1139,8 +1120,7 @@ $('dateFilter').addEventListener('change', (e) => {
   renderGalleryFiltered();
 });
 $('clearDateBtn').onclick = () => {
-  $('dateFilter').value = '';
-  currentFilterDate = '';
+  $('dateFilter').value = ''; currentFilterDate = '';
   $('clearDateBtn').style.display = 'none';
   renderGalleryFiltered();
 };
@@ -1219,7 +1199,6 @@ function bindCards() {
       if (!confirm(`确定删除「${name}」吗？`)) return;
       if (!getToken()) return toast('请先设置 Token', 'error');
       try {
-        // 删除时也重新取一次最新 sha，避免 sha 过期
         const infoRes = await fetch(API_BASE + encodeURIComponent(name) + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
         let useSha = sha;
         if (infoRes.ok) { const info = await infoRes.json(); if (info.sha) useSha = info.sha; }
@@ -1253,13 +1232,23 @@ function cropGalleryImage(name, url) {
   });
 }
 
-/* ==================== 改名（健壮版） ==================== */
+/* ==================== 改名（Git Data API 快速版） ==================== */
 let renamingFile = null;
+
+function setRenameStatus(text, show = true) {
+  const el = $('renameStatus');
+  el.textContent = text;
+  el.classList.toggle('show', show);
+}
 
 function openRenameModal(name) {
   renamingFile = { name };
   const input = $('renameInput');
   input.value = name;
+  input.disabled = false;
+  $('renameConfirmBtn').disabled = false;
+  $('renameCancelBtn').disabled = false;
+  setRenameStatus('', false);
   $('renameModal').classList.add('show');
   document.body.style.overflow = 'hidden';
   setTimeout(() => {
@@ -1271,9 +1260,110 @@ function openRenameModal(name) {
 function closeRenameModal() {
   $('renameModal').classList.remove('show');
   document.body.style.overflow = '';
+  setRenameStatus('', false);
   renamingFile = null;
 }
 $('renameCancelBtn').onclick = closeRenameModal;
+
+/**
+ * ⭐ 核心：用 Git Data API 改名
+ * 不传输文件内容，只改路径 → 手机也秒改
+ */
+async function renameViaGitData(oldName, newName, onStep) {
+  const branch = CONFIG.branch;
+  const headers = getHeaders();
+
+  // ① 并行拿：文件最新 sha + 分支最新 commit + _dates.json 内容
+  onStep('① 读取信息…');
+  const [contentRes, refRes, datesResult] = await Promise.all([
+    fetch(`${API_REPO}/contents/${encodeURIComponent(oldName)}?ref=${branch}&t=${Date.now()}`, { headers }),
+    fetch(`${API_REPO}/git/ref/heads/${branch}?t=${Date.now()}`, { headers }),
+    loadDatesJson()
+  ]);
+  if (!contentRes.ok) throw new Error(`读取文件失败 HTTP ${contentRes.status}（文件可能已被删）`);
+  if (!refRes.ok) throw new Error(`读取分支失败 HTTP ${refRes.status}`);
+  const contentInfo = await contentRes.json();
+  const refInfo = await refRes.json();
+  const blobSha = contentInfo.sha;
+  const parentCommitSha = refInfo.object.sha;
+  if (!blobSha || !parentCommitSha) throw new Error('未获取到关键 sha');
+
+  // ② 拿 tree sha
+  onStep('② 获取目录树…');
+  const commitRes = await fetch(`${API_REPO}/git/commits/${parentCommitSha}?t=${Date.now()}`, { headers });
+  if (!commitRes.ok) throw new Error(`读取提交失败 HTTP ${commitRes.status}`);
+  const commitInfo = await commitRes.json();
+  const baseTreeSha = commitInfo.tree.sha;
+
+  // ③ 准备 _dates.json 新内容（时间迁移）
+  onStep('③ 迁移时间记录…');
+  const dates = datesResult.data || {};
+  const oldTime = dates[oldName] || globalFileDates[oldName] || new Date().toISOString();
+  const newDates = { ...dates };
+  delete newDates[oldName];
+  newDates[newName] = oldTime;
+
+  let datesBlobSha = null;
+  try {
+    const blobRes = await fetch(`${API_REPO}/git/blobs`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ content: JSON.stringify(newDates, null, 2), encoding: 'utf-8' })
+    });
+    if (blobRes.ok) { const b = await blobRes.json(); datesBlobSha = b.sha; }
+  } catch (e) { console.warn('准备 _dates.json blob 失败', e); }
+
+  // ④ 创建新 tree（删旧路径 + 加新路径 + 更新 _dates.json）
+  onStep('④ 生成新目录…');
+  const treeItems = [
+    { path: oldName, mode: '100644', type: 'blob', sha: null },   // 删除旧路径
+    { path: newName, mode: '100644', type: 'blob', sha: blobSha } // 新路径指向原 blob（内容不变！）
+  ];
+  if (datesBlobSha) {
+    treeItems.push({ path: DATES_FILE, mode: '100644', type: 'blob', sha: datesBlobSha });
+  }
+  const treeRes = await fetch(`${API_REPO}/git/trees`, {
+    method: 'POST', headers,
+    body: JSON.stringify({ base_tree: baseTreeSha, tree: treeItems })
+  });
+  if (!treeRes.ok) {
+    const e = await treeRes.json().catch(() => ({}));
+    throw new Error(`创建 tree 失败 HTTP ${treeRes.status} ${e.message || ''}`);
+  }
+  const newTree = await treeRes.json();
+
+  // ⑤ 创建新 commit
+  onStep('⑤ 提交改名…');
+  const commitCreateRes = await fetch(`${API_REPO}/git/commits`, {
+    method: 'POST', headers,
+    body: JSON.stringify({
+      message: `rename: ${oldName} → ${newName}`,
+      tree: newTree.sha,
+      parents: [parentCommitSha]
+    })
+  });
+  if (!commitCreateRes.ok) {
+    const e = await commitCreateRes.json().catch(() => ({}));
+    throw new Error(`创建 commit 失败 HTTP ${commitCreateRes.status} ${e.message || ''}`);
+  }
+  const newCommit = await commitCreateRes.json();
+
+  // ⑥ 更新分支 ref
+  onStep('⑥ 更新分支…');
+  const updateRes = await fetch(`${API_REPO}/git/refs/heads/${branch}`, {
+    method: 'PATCH', headers,
+    body: JSON.stringify({ sha: newCommit.sha, force: false })
+  });
+  if (!updateRes.ok) {
+    const e = await updateRes.json().catch(() => ({}));
+    throw new Error(`更新分支失败 HTTP ${updateRes.status} ${e.message || ''}`);
+  }
+
+  // 更新本地缓存
+  delete globalFileDates[oldName];
+  globalFileDates[newName] = oldTime;
+
+  return { newName };
+}
 
 $('renameConfirmBtn').onclick = async () => {
   if (!renamingFile) return;
@@ -1291,98 +1381,29 @@ $('renameConfirmBtn').onclick = async () => {
   }
 
   const btn = $('renameConfirmBtn');
+  const cancelBtn = $('renameCancelBtn');
   btn.disabled = true;
+  cancelBtn.disabled = true;
+  $('renameInput').disabled = true;
   btn.textContent = '处理中…';
-  toast('正在重命名…');
 
-  let step = '① 读取原文件信息';
   try {
-    // Step 1: 重新读取原文件最新信息
-    const infoRes = await fetch(
-      API_BASE + encodeURIComponent(oldName) + `?ref=${CONFIG.branch}&t=${Date.now()}`,
-      { headers: getHeaders() }
-    );
-    if (!infoRes.ok) {
-      const e = await infoRes.json().catch(() => ({}));
-      throw new Error(`HTTP ${infoRes.status} ${e.message || ''}`);
-    }
-    const info = await infoRes.json();
-    const latestSha = info.sha;
-    if (!latestSha) throw new Error('未获取到 sha');
-
-    // Step 2: 获取文件内容
-    step = '② 读取文件内容';
-    let base64Content = '';
-    if (info.content && info.encoding === 'base64' && info.content.trim()) {
-      base64Content = info.content.replace(/\s/g, '');
-    } else if (info.sha) {
-      // 大文件走 git/blobs API（不受 1MB 限制，无跨域问题）
-      const blobRes = await fetch(`${API_GIT}/blobs/${info.sha}`, { headers: getHeaders() });
-      if (!blobRes.ok) throw new Error(`blob HTTP ${blobRes.status}`);
-      const blob = await blobRes.json();
-      base64Content = (blob.content || '').replace(/\s/g, '');
-    } else if (info.download_url) {
-      // 兜底：raw 公开下载（不带 Token，避免 CORS）
-      const rawRes = await fetch(info.download_url + `?t=${Date.now()}`);
-      if (!rawRes.ok) throw new Error(`raw HTTP ${rawRes.status}`);
-      const buf = await rawRes.arrayBuffer();
-      base64Content = arrayBufferToBase64(buf);
-    }
-    if (!base64Content) throw new Error('文件内容为空');
-
-    // Step 3: 上传新文件
-    step = '③ 上传新文件';
-    const putRes = await fetch(API_BASE + encodeURIComponent(newName), {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify({
-        message: `rename: ${oldName} → ${newName}`,
-        content: base64Content,
-        branch: CONFIG.branch
-      })
+    await renameViaGitData(oldName, newName, (msg) => {
+      setRenameStatus(msg);
+      btn.textContent = msg.replace(/[①-⑨]\s*/, '').replace('…', '');
     });
-    if (!putRes.ok) {
-      const e = await putRes.json().catch(() => ({}));
-      throw new Error(`HTTP ${putRes.status} ${e.message || ''}`);
-    }
-
-    // Step 4: 删除旧文件
-    step = '④ 删除旧文件';
-    const delRes = await fetch(API_BASE + encodeURIComponent(oldName), {
-      method: 'DELETE',
-      headers: getHeaders(),
-      body: JSON.stringify({
-        message: `rename: remove ${oldName}`,
-        sha: latestSha,
-        branch: CONFIG.branch
-      })
-    });
-    if (!delRes.ok) {
-      const e = await delRes.json().catch(() => ({}));
-      throw new Error(`HTTP ${delRes.status} ${e.message || ''}（新文件已上传成功，旧文件可手动删除）`);
-    }
-
-    // Step 5: 迁移时间
-    step = '⑤ 迁移时间记录';
-    try {
-      const { data: dates, sha: dsha } = await loadDatesJson();
-      const oldTime = dates[oldName] || globalFileDates[oldName] || new Date().toISOString();
-      delete dates[oldName];
-      dates[newName] = oldTime;
-      await saveDatesJson(dates, dsha);
-    } catch (e) {
-      console.error('迁移时间记录失败', e);
-    }
-
-    toast(`已重命名为「${newName}」✓`, 'success');
+    setRenameStatus('✅ 改名成功，正在刷新图库…');
+    toast(`已重命名为「${newName}」✓`, 'success', 3000);
     closeRenameModal();
     await loadGallery();
-
   } catch (e) {
-    toast(`重命名失败（${step}）：${e.message}`, 'error');
     console.error('重命名失败:', e);
-  } finally {
+    setRenameStatus('❌ 失败：' + e.message);
+    toast('重命名失败：' + e.message, 'error', 5000);
     btn.disabled = false;
+    cancelBtn.disabled = false;
+    $('renameInput').disabled = false;
+  } finally {
     btn.textContent = '确认改名';
   }
 };
@@ -1436,11 +1457,9 @@ $('fillDatesBtn').onclick = async () => {
 
 /* ==================== 刷新 ==================== */
 $('refreshBtn').onclick = () => {
-  $('searchInput').value = '';
-  currentSearchKeyword = '';
+  $('searchInput').value = ''; currentSearchKeyword = '';
   currentFilterType = 'all';
-  $('dateFilter').value = '';
-  currentFilterDate = '';
+  $('dateFilter').value = ''; currentFilterDate = '';
   $('clearDateBtn').style.display = 'none';
   loadGallery();
   toast('正在刷新…');
