@@ -28,7 +28,6 @@ body{
   color:var(--text); min-height:100vh;
   padding-bottom:env(safe-area-inset-bottom);
 }
-/* ===== 头部 ===== */
 .header{
   background:linear-gradient(135deg,#7c3aed 0%,#db2777 100%);
   color:#fff; padding:26px 28px; border-radius:0 0 24px 24px;
@@ -45,7 +44,6 @@ body{
 }
 .header h1{font-size:1.35rem; font-weight:700; letter-spacing:.5px; position:relative}
 .header .sub{font-size:.8rem; opacity:.85; margin-top:2px; font-weight:400}
-/* ===== 按钮 ===== */
 .btn{
   border:none; border-radius:12px; padding:10px 20px; font-size:.9rem;
   cursor:pointer; transition:all .2s; font-weight:600; font-family:inherit;
@@ -59,7 +57,6 @@ body{
 .btn-danger{background:#fef2f2; color:#dc2626}
 .btn-sm{padding:7px 14px; font-size:.8rem; border-radius:10px}
 .btn:disabled{opacity:.5; cursor:not-allowed; transform:none}
-/* ===== 布局 ===== */
 .container{max-width:1150px; margin:0 auto; padding:24px 20px 60px}
 .card{
   background:#fff; border-radius:20px; box-shadow:var(--shadow);
@@ -70,14 +67,12 @@ body{
   display:flex; align-items:center; gap:8px; font-weight:700; flex-wrap:wrap;
 }
 .card h2 .dot{width:8px; height:8px; border-radius:50%; background:var(--grad)}
-/* ===== Token ===== */
 .token-row{display:flex; gap:10px; flex-wrap:wrap}
 .token-row input{
   flex:1; min-width:200px; padding:12px 16px; border:2px solid var(--border);
   border-radius:12px; font-size:.9rem; outline:none; transition:border .2s; font-family:inherit;
 }
 .token-row input:focus{border-color:var(--primary)}
-/* ===== 上传区 ===== */
 .drop-zone{
   border:2px dashed #d8ccf5; border-radius:18px; padding:40px 20px;
   text-align:center; color:var(--muted); cursor:pointer;
@@ -89,7 +84,6 @@ body{
 .drop-zone .icon{font-size:2rem; margin-bottom:8px; display:block}
 .drop-zone p{font-size:.95rem; font-weight:600; color:var(--text)}
 .drop-zone .hint{font-size:.78rem; margin-top:8px; color:#a8a3b8; font-weight:400}
-/* ===== 待上传列表 ===== */
 .pending-list{display:flex; flex-direction:column; gap:10px; margin-top:16px}
 .pending-item{
   display:flex; align-items:center; gap:14px; padding:12px;
@@ -110,17 +104,10 @@ body{
   background:#ede9fe; color:var(--primary-dark); margin-left:6px; font-weight:600;
 }
 .pending-actions{display:flex; gap:8px; flex-shrink:0}
-/* ===== 进度 ===== */
 .progress-wrap{height:8px; background:#f3f0fa; border-radius:4px; margin-top:16px; overflow:hidden; display:none}
 .progress-bar{height:100%; width:0; background:var(--grad); border-radius:4px; transition:width .3s}
-
-/* ===== 图库：搜索、筛选与日期 ===== */
-.filter-bar {
-  display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
-}
-.search-box {
-  flex: 1; min-width: 200px; position: relative;
-}
+.filter-bar { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.search-box { flex: 1; min-width: 200px; position: relative; }
 .search-box input {
   width: 100%; padding: 10px 16px 10px 36px; border: 2px solid var(--border);
   border-radius: 12px; font-size: 0.9rem; outline: none; transition: border .2s; font-family: inherit;
@@ -130,8 +117,6 @@ body{
   position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
   width: 16px; height: 16px; fill: #a8a3b8;
 }
-
-/* 顶部右侧：动态后缀分类 */
 .type-filters {
   display: flex; gap: 6px; background: #f3f0fa; padding: 4px; border-radius: 12px;
   overflow-x: auto; white-space: nowrap; max-width: 100%;
@@ -145,8 +130,6 @@ body{
 }
 .filter-btn:hover { color: var(--primary); }
 .filter-btn.active { background: #fff; color: var(--primary-dark); box-shadow: 0 2px 8px rgba(139,92,246,.15); }
-
-/* 日期筛选栏 */
 .date-filter-row {
   display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
   background: #fdfbff; padding: 10px 16px; border-radius: 12px; border: 1px dashed #d8ccf5;
@@ -158,8 +141,6 @@ body{
   background: #fff; cursor: pointer;
 }
 .date-input:focus { border-color: var(--primary); }
-
-/* ===== 图库：日期分组折叠 ===== */
 .gallery-wrapper { display: flex; flex-direction: column; gap: 16px; }
 .date-group {
   background: #fff; border-radius: 16px; box-shadow: var(--shadow);
@@ -177,7 +158,6 @@ body{
 .date-group[open] summary::after { transform: rotate(90deg); }
 .date-group[open] summary { border-bottom: 1px solid var(--border); }
 .date-group .gallery { padding: 18px; }
-
 .gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px}
 .item-card{
   background:#fff; border-radius:18px; overflow:hidden; display:flex; flex-direction:column;
@@ -198,8 +178,6 @@ body{
 }
 .item-preview:hover .crop-hint{opacity:1}
 .item-body{padding:14px; display:flex; flex-direction:column; gap:10px}
-
-/* 文件名与时间 */
 .item-title-row { display: flex; flex-direction: column; gap: 2px; }
 .item-name{
   font-size:.8rem; color:var(--text); font-weight:600;
@@ -211,15 +189,12 @@ body{
 .item-name:hover{color:var(--primary);}
 .item-name:hover .edit-icon{opacity:1;}
 .item-time{font-size:.7rem; color:#a8a3b8; font-family:monospace;}
-
 .link-row{display:flex; gap:6px}
 .link-row input{
   flex:1; min-width:0; padding:8px 10px; border:1px solid var(--border);
   border-radius:9px; font-size:.72rem; color:#555; outline:none; font-family:inherit;
 }
 .action-row{display:flex; gap:6px; flex-wrap:wrap}
-
-/* ===== Toast & 空状态 ===== */
 .toast{
   position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px);
   background:#1e1b4b; color:#fff; padding:14px 26px; border-radius:14px;
@@ -231,8 +206,6 @@ body{
 .toast.success{background:#10b981}
 .empty-tip{text-align:center; color:#c4bdd6; padding:50px 0; font-size:.9rem}
 .empty-tip .big{font-size:2.4rem; display:block; margin-bottom:10px}
-
-/* ===== 改名模态框 ===== */
 .rename-modal{
   position:fixed; inset:0; background:rgba(15,10,35,.65); z-index:10000;
   display:none; align-items:center; justify-content:center; padding:20px;
@@ -259,8 +232,6 @@ body{
 .rename-dialog input:focus{border-color:var(--primary);}
 .rename-hint{font-size:.75rem; color:var(--muted); margin-top:10px; line-height:1.5;}
 .rename-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:20px;}
-
-/* ===== 裁剪模态框 ===== */
 .crop-modal{
   position:fixed; inset:0; background:rgba(15,10,35,.94); z-index:9999;
   display:none; flex-direction:column; backdrop-filter:blur(8px);
@@ -314,8 +285,6 @@ body{
 .ratio-btn.active{background:var(--grad); color:#fff; box-shadow:0 4px 14px rgba(236,72,153,.4)}
 .zoom-slider{flex:1; min-width:140px; accent-color:var(--pink); height:6px}
 .crop-actions{display:flex; justify-content:flex-end; gap:10px}
-
-/* ===== 响应式：平板 / 手机 ===== */
 @media (max-width:768px){
   .container{padding:16px 12px 40px}
   .card{padding:16px; border-radius:16px}
@@ -380,7 +349,6 @@ body{
 
 <div class="container">
 
-  <!-- Token -->
   <div class="card">
     <h2><span class="dot"></span>GitHub Token 设置</h2>
     <div class="token-row">
@@ -392,7 +360,6 @@ body{
     </div>
   </div>
 
-  <!-- 上传 -->
   <div class="card">
     <h2><span class="dot"></span>上传文件</h2>
     <div class="drop-zone" id="dropZone">
@@ -412,21 +379,18 @@ body{
     </div>
   </div>
 
-  <!-- 图库 -->
   <div class="card">
     <div class="gallery-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
       <h2 style="margin-bottom:0;"><span class="dot"></span>图库 <span style="font-weight:400;color:#a8a3b8;font-size:.8rem;" id="galleryCount"></span></h2>
 
       <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" id="fillDatesBtn" style="display:none;">⏱️ 补全历史时间</button>
-        <!-- 右上角：动态后缀分类 -->
         <div class="type-filters" id="typeFilters">
           <button class="filter-btn active" data-type="all">全部</button>
         </div>
       </div>
     </div>
 
-    <!-- 搜索与日期筛选栏 -->
     <div class="filter-bar">
       <div class="search-box">
         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
@@ -440,7 +404,6 @@ body{
       <button class="btn btn-ghost btn-sm" id="clearDateBtn" style="display:none;">清除日期</button>
     </div>
 
-    <!-- 按时间折叠的容器 -->
     <div class="gallery-wrapper" id="gallery"></div>
 
     <div class="empty-tip" id="emptyTip"><span class="big">📭</span>暂无文件，上传后会显示在这里</div>
@@ -448,10 +411,8 @@ body{
 
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- 改名模态框 -->
 <div class="rename-modal" id="renameModal">
   <div class="rename-dialog">
     <h3>✏️ 重命名文件</h3>
@@ -464,7 +425,6 @@ body{
   </div>
 </div>
 
-<!-- 裁剪模态框 -->
 <div class="crop-modal" id="cropModal">
   <div class="crop-header">
     <h3>✂️ 裁剪图片</h3>
@@ -504,7 +464,7 @@ body{
 
 <script>
 /* ============================================================
- *  配置区：已按你的仓库填好，如需换仓库改这里
+ *  配置区
  * ============================================================ */
 const CONFIG = {
   username: '99434',
@@ -514,11 +474,11 @@ const CONFIG = {
 
 const API_BASE    = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/contents/`;
 const API_COMMITS = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/commits`;
+const API_GIT     = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repo}/git`;
 const TOKEN_KEY   = 'github_imghost_token';
 const RAW_BASE    = `https://cdn.jsdelivr.net/gh/${CONFIG.username}/${CONFIG.repo}@${CONFIG.branch}/`;
 const DATES_FILE  = '_dates.json';
 
-/* ==================== 通用工具 ==================== */
 const $ = id => document.getElementById(id);
 
 function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
@@ -529,7 +489,7 @@ function toast(msg, type = '') {
   el.textContent = msg;
   el.className = 'toast show ' + type;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.className = 'toast', 2600);
+  toastTimer = setTimeout(() => el.className = 'toast', 3000);
 }
 
 function getHeaders() {
@@ -575,7 +535,7 @@ function copyText(text) {
   });
 }
 
-/* UTF-8 安全的 Base64 编解码（文件名可能有中文） */
+/* UTF-8 安全 Base64 */
 function encodeBase64(str) {
   const bytes = new TextEncoder().encode(str);
   let binary = '';
@@ -585,7 +545,6 @@ function encodeBase64(str) {
   }
   return btoa(binary);
 }
-
 function decodeBase64(b64) {
   const clean = b64.replace(/\s/g, '');
   const binary = atob(clean);
@@ -593,7 +552,6 @@ function decodeBase64(b64) {
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return new TextDecoder().decode(bytes);
 }
-
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -604,19 +562,29 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
+/* HTML 属性转义：避免文件名含特殊字符破坏 DOM */
+function escapeAttr(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 /* ==================== 全局状态 ==================== */
 let pendingFiles = [];
 let existingNames = new Set();
 let uid = 0;
-
-// 搜索、类型、日期筛选状态
 let allFilesData = [];
-let globalFileDates = {}; // { 文件名: ISO时间字符串 }
+let globalFileDates = {};
 let currentFilterType = 'all';
 let currentSearchKeyword = '';
 let currentFilterDate = '';
 
-/* ==================== _dates.json 时间记录 ==================== */
+/* ==================== _dates.json ==================== */
 async function loadDatesJson() {
   try {
     const res = await fetch(API_BASE + DATES_FILE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
@@ -628,37 +596,26 @@ async function loadDatesJson() {
     return { data: {}, sha: null };
   }
 }
-
 async function saveDatesJson(data, sha) {
   const content = encodeBase64(JSON.stringify(data, null, 2));
-  const body = {
-    message: `update _dates.json (${new Date().toISOString()})`,
-    content,
-    branch: CONFIG.branch
-  };
+  const body = { message: `update _dates.json (${new Date().toISOString()})`, content, branch: CONFIG.branch };
   if (sha) body.sha = sha;
   const res = await fetch(API_BASE + DATES_FILE, {
-    method: 'PUT',
-    headers: getHeaders(),
-    body: JSON.stringify(body)
+    method: 'PUT', headers: getHeaders(), body: JSON.stringify(body)
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || '保存时间记录失败');
   }
 }
-
 async function recordFileDate(name, dateStr) {
   try {
     const { data, sha } = await loadDatesJson();
     data[name] = dateStr;
     await saveDatesJson(data, sha);
     globalFileDates[name] = dateStr;
-  } catch (e) {
-    console.error('记录时间失败', e);
-  }
+  } catch (e) { console.error('记录时间失败', e); }
 }
-
 async function deleteFileDate(name) {
   try {
     const { data, sha } = await loadDatesJson();
@@ -667,12 +624,10 @@ async function deleteFileDate(name) {
       await saveDatesJson(data, sha);
     }
     delete globalFileDates[name];
-  } catch (e) {
-    console.error('删除时间记录失败', e);
-  }
+  } catch (e) { console.error('删除时间记录失败', e); }
 }
 
-/* ==================== Token 管理 ==================== */
+/* ==================== Token ==================== */
 $('saveTokenBtn').onclick = () => {
   const t = $('tokenInput').value.trim();
   if (!t) return toast('请先粘贴 Token', 'error');
@@ -680,13 +635,11 @@ $('saveTokenBtn').onclick = () => {
   toast('Token 已保存 ✓', 'success');
   loadGallery();
 };
-
 $('clearTokenBtn').onclick = () => {
   localStorage.removeItem(TOKEN_KEY);
   $('tokenInput').value = '';
   toast('Token 已清除');
 };
-
 $('pasteTokenBtn').onclick = async () => {
   try {
     const text = await navigator.clipboard.readText();
@@ -698,17 +651,15 @@ $('pasteTokenBtn').onclick = async () => {
   }
 };
 
-/* ==================== 文件选择 / 拖拽 ==================== */
+/* ==================== 文件选择 ==================== */
 const dropZone = $('dropZone');
 const fileInput = $('fileInput');
 
 dropZone.onclick = () => fileInput.click();
-
 fileInput.onchange = () => {
   addFiles(Array.from(fileInput.files));
   fileInput.value = '';
 };
-
 dropZone.addEventListener('dragover', e => {
   e.preventDefault();
   dropZone.classList.add('dragover');
@@ -725,30 +676,21 @@ dropZone.addEventListener('drop', e => {
 function addFiles(files) {
   const valid = files.filter(f => isImage(f.name) || isAudio(f.name));
   if (!valid.length) return toast('没有可用的图片或音频文件', 'error');
-
   valid.forEach(f => {
-    pendingFiles.push({
-      id: ++uid,
-      file: f,
-      previewUrl: URL.createObjectURL(f),
-      cropped: false
-    });
+    pendingFiles.push({ id: ++uid, file: f, previewUrl: URL.createObjectURL(f), cropped: false });
   });
   renderPending();
   toast(`已添加 ${valid.length} 个文件`, 'success');
 }
 
-/* ==================== 待上传列表渲染 ==================== */
 function renderPending() {
   const list = $('pendingList');
   const bar  = $('uploadBar');
-
   if (!pendingFiles.length) {
     list.innerHTML = '';
     bar.style.display = 'none';
     return;
   }
-
   bar.style.display = 'flex';
   $('uploadAllBtn').textContent = `开始上传（${pendingFiles.length}）`;
 
@@ -757,12 +699,10 @@ function renderPending() {
     return `
       <div class="pending-item" data-id="${item.id}">
         <div class="pending-thumb">
-          ${isImg
-            ? `<img src="${item.previewUrl}" alt="">`
-            : `<span style="font-size:1.4rem">🎵</span>`}
+          ${isImg ? `<img src="${item.previewUrl}" alt="">` : `<span style="font-size:1.4rem">🎵</span>`}
         </div>
         <div class="pending-meta">
-          <div class="pending-name">${item.file.name}
+          <div class="pending-name">${escapeHtml(item.file.name)}
             ${item.cropped ? '<span class="pending-badge">已裁剪</span>' : ''}
           </div>
           <div class="pending-size">${fmtSize(item.file.size)}</div>
@@ -835,7 +775,6 @@ function closeCropper() {
   document.body.style.overflow = '';
   crop.img = null; crop.onConfirm = null;
 }
-
 $('cropClose').onclick = closeCropper;
 $('cropCancel').onclick = closeCropper;
 
@@ -859,20 +798,17 @@ function setupCrop(img) {
   crop.box = { x: crop.imgX + (dw - bw) / 2, y: crop.imgY + (dh - bh) / 2, w: bw, h: bh };
   drawCanvas(); syncBoxEl();
 }
-
 function drawCanvas() {
   const { img, imgX, imgY, scale, stageW, stageH } = crop;
   if (!img) return;
   cropCtx.clearRect(0, 0, stageW, stageH);
   cropCtx.drawImage(img, imgX, imgY, img.width * scale, img.height * scale);
 }
-
 function syncBoxEl() {
   const b = crop.box;
   cropBoxEl.style.left = b.x + 'px'; cropBoxEl.style.top = b.y + 'px';
   cropBoxEl.style.width = b.w + 'px'; cropBoxEl.style.height = b.h + 'px';
 }
-
 function visibleBounds() {
   const { img, imgX, imgY, scale, stageW, stageH } = crop;
   return {
@@ -881,7 +817,6 @@ function visibleBounds() {
     maxY: Math.min(stageH, imgY + img.height * scale)
   };
 }
-
 function clampBox() {
   const b = crop.box, vb = visibleBounds(), minW = 40, minH = 40;
   b.w = Math.max(minW, Math.min(b.w, vb.maxX - vb.minX));
@@ -889,7 +824,6 @@ function clampBox() {
   b.x = Math.max(vb.minX, Math.min(b.x, vb.maxX - b.w));
   b.y = Math.max(vb.minY, Math.min(b.y, vb.maxY - b.h));
 }
-
 let drag = null;
 cropBoxEl.addEventListener('pointerdown', e => {
   const handle = e.target.dataset.handle;
@@ -1019,7 +953,6 @@ async function uploadOne(file) {
   });
   if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `HTTP ${res.status}`); }
   existingNames.add(finalName);
-  // ⭐ 关键：上传成功后，立刻把精确时间写入 _dates.json
   await recordFileDate(finalName, new Date().toISOString());
   return finalName;
 }
@@ -1049,7 +982,7 @@ $('uploadAllBtn').onclick = async () => {
   loadGallery();
 };
 
-/* ==================== 图库：搜索、筛选与加载 ==================== */
+/* ==================== 图库加载 ==================== */
 async function loadGallery() {
   const gallery = $('gallery');
   const emptyTip = $('emptyTip');
@@ -1066,7 +999,6 @@ async function loadGallery() {
   emptyTip.style.display = 'none';
 
   try {
-    // 1. 获取文件列表
     const resContent = await fetch(API_BASE + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
     if (!resContent.ok) throw new Error('获取文件列表失败');
     const dataContent = await resContent.json();
@@ -1086,11 +1018,9 @@ async function loadGallery() {
       return;
     }
 
-    // 2. ⭐ 从 _dates.json 读取时间（这是权威时间源）
     const { data: datesData } = await loadDatesJson();
     globalFileDates = datesData || {};
 
-    // 3. 检查缺失时间的文件（老文件）
     const missing = allFilesData.filter(f => !globalFileDates[f.name]);
     if (missing.length > 0) {
       $('fillDatesBtn').style.display = 'inline-block';
@@ -1099,10 +1029,7 @@ async function loadGallery() {
       $('fillDatesBtn').style.display = 'none';
     }
 
-    // 4. 动态生成后缀分类按钮
     updateTypeFilters();
-
-    // 5. 渲染
     renderGalleryFiltered();
 
   } catch (e) {
@@ -1113,7 +1040,6 @@ async function loadGallery() {
   }
 }
 
-// 动态生成后缀分类按钮
 function updateTypeFilters() {
   const container = $('typeFilters');
   const exts = new Set();
@@ -1121,38 +1047,31 @@ function updateTypeFilters() {
     const match = f.name.match(/\.([a-zA-Z0-9]+)$/);
     if (match) exts.add(match[1].toLowerCase());
   });
-
   const sortedExts = Array.from(exts).sort();
-
   let html = `<button class="filter-btn ${currentFilterType === 'all' ? 'active' : ''}" data-type="all">全部</button>`;
   sortedExts.forEach(ext => {
     html += `<button class="filter-btn ${currentFilterType === ext ? 'active' : ''}" data-type="${ext}">${ext}</button>`;
   });
   container.innerHTML = html;
-
   container.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentFilterType = e.target.dataset.type;
-
       $('searchInput').value = '';
       currentSearchKeyword = '';
       $('dateFilter').value = '';
       currentFilterDate = '';
       $('clearDateBtn').style.display = 'none';
-
       renderGalleryFiltered();
     });
   });
 }
 
-// 核心渲染函数
 function renderGalleryFiltered() {
   const gallery = $('gallery');
   const emptyTip = $('emptyTip');
 
-  // 1. 过滤数据
   let filteredFiles = allFilesData.filter(f => {
     const fileExt = (f.name.match(/\.([a-zA-Z0-9]+)$/) || ['', ''])[1].toLowerCase();
     const matchType = currentFilterType === 'all' || fileExt === currentFilterType;
@@ -1168,10 +1087,8 @@ function renderGalleryFiltered() {
     emptyTip.innerHTML = '<span class="big">🔍</span>没有找到符合条件的文件';
     return;
   }
-
   emptyTip.style.display = 'none';
 
-  // 2. 按日期分组
   const groups = {};
   filteredFiles.forEach(f => {
     const fullDate = globalFileDates[f.name];
@@ -1180,26 +1097,22 @@ function renderGalleryFiltered() {
     groups[dateOnly].push(f);
   });
 
-  // 3. 排序日期（降序，"未知日期"放最后）
   const sortedDates = Object.keys(groups).sort((a, b) => {
     if (a === '未知日期') return 1;
     if (b === '未知日期') return -1;
     return b.localeCompare(a);
   });
 
-  // 4. 渲染 HTML
   let html = '';
   sortedDates.forEach((date, index) => {
     const isSearching = currentSearchKeyword !== '' || currentFilterType !== 'all' || currentFilterDate !== '';
     const isOpen = (index === 0 || isSearching || date === '未知日期') ? 'open' : '';
     const count = groups[date].length;
-
     let displayDate = date;
     if (date !== '未知日期') {
       const parts = date.split('-');
       displayDate = `${parts[0]}年${parts[1]}月${parts[2]}日`;
     }
-
     html += `
       <details class="date-group" ${isOpen}>
         <summary>
@@ -1209,27 +1122,22 @@ function renderGalleryFiltered() {
         <div class="gallery">
           ${groups[date].map(renderCard).join('')}
         </div>
-      </details>
-    `;
+      </details>`;
   });
 
   gallery.innerHTML = html;
   bindCards();
 }
 
-// 绑定搜索栏
 $('searchInput').addEventListener('input', (e) => {
   currentSearchKeyword = e.target.value.trim();
   renderGalleryFiltered();
 });
-
-// 绑定日期筛选
 $('dateFilter').addEventListener('change', (e) => {
   currentFilterDate = e.target.value;
   $('clearDateBtn').style.display = currentFilterDate ? 'inline-block' : 'none';
   renderGalleryFiltered();
 });
-
 $('clearDateBtn').onclick = () => {
   $('dateFilter').value = '';
   currentFilterDate = '';
@@ -1242,8 +1150,10 @@ function renderCard(file) {
   const sha = file.sha;
   const url = RAW_BASE + encodeURIComponent(name);
   const img = isImage(name);
+  const safeName = escapeAttr(name);
+  const safeSha = escapeAttr(sha);
+  const safeUrl = escapeAttr(url);
 
-  // 格式化时间（转本地时间，精确到秒）
   const fullDate = globalFileDates[name];
   let timeDisplay = '未知时间';
   if (fullDate) {
@@ -1256,24 +1166,24 @@ function renderCard(file) {
 
   const preview = img
     ? `<div class="item-preview">
-         <img src="${url}" alt="${name}" loading="lazy" onerror="this.style.display='none'">
+         <img src="${safeUrl}" alt="${safeName}" loading="lazy" onerror="this.style.display='none'">
          <div class="crop-hint">点击图片可裁剪</div>
        </div>`
-    : `<div class="item-preview"><audio controls preload="none" src="${url}"></audio></div>`;
+    : `<div class="item-preview"><audio controls preload="none" src="${safeUrl}"></audio></div>`;
 
   return `
-    <div class="item-card" data-name="${name}" data-sha="${sha}">
+    <div class="item-card" data-name="${safeName}" data-sha="${safeSha}">
       ${preview}
       <div class="item-body">
         <div class="item-title-row">
           <div class="item-name" title="点击改名">
-            <span class="name-text">${name}</span>
+            <span class="name-text">${escapeHtml(name)}</span>
             <span class="edit-icon">✏️</span>
           </div>
           <div class="item-time">🕒 ${timeDisplay}</div>
         </div>
         <div class="link-row">
-          <input type="text" readonly value="${url}" class="link-input">
+          <input type="text" readonly value="${safeUrl}" class="link-input">
           <button class="btn btn-ghost btn-sm copy-btn">复制</button>
         </div>
         <div class="action-row">
@@ -1296,27 +1206,29 @@ function bindCards() {
       copyText(url).then(() => toast('链接已复制 ✓', 'success'))
         .catch(() => { linkInput.select(); document.execCommand('copy'); toast('链接已复制 ✓', 'success'); });
     };
-
     card.querySelector('.open-btn').onclick = () => window.open(url, '_blank');
     const cropBtn = card.querySelector('.crop-btn');
     if (cropBtn) cropBtn.onclick = () => cropGalleryImage(name, url);
     const previewImg = card.querySelector('.item-preview img');
     if (previewImg) previewImg.onclick = () => cropGalleryImage(name, url);
 
-    // ⭐ 点击文件名 → 弹出改名框
     const nameEl = card.querySelector('.item-name');
-    if (nameEl) nameEl.onclick = () => openRenameModal(name, sha);
+    if (nameEl) nameEl.onclick = () => openRenameModal(name);
 
     card.querySelector('.delete-btn').onclick = async () => {
       if (!confirm(`确定删除「${name}」吗？`)) return;
       if (!getToken()) return toast('请先设置 Token', 'error');
       try {
+        // 删除时也重新取一次最新 sha，避免 sha 过期
+        const infoRes = await fetch(API_BASE + encodeURIComponent(name) + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
+        let useSha = sha;
+        if (infoRes.ok) { const info = await infoRes.json(); if (info.sha) useSha = info.sha; }
+
         const res = await fetch(API_BASE + encodeURIComponent(name), {
           method: 'DELETE', headers: getHeaders(),
-          body: JSON.stringify({ message: `delete: ${name}`, sha: sha, branch: CONFIG.branch })
+          body: JSON.stringify({ message: `delete: ${name}`, sha: useSha, branch: CONFIG.branch })
         });
         if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `HTTP ${res.status}`); }
-        // ⭐ 同步删除时间记录
         await deleteFileDate(name);
         toast(`「${name}」已删除`, 'success');
         loadGallery();
@@ -1341,71 +1253,86 @@ function cropGalleryImage(name, url) {
   });
 }
 
-/* ==================== 改名功能 ==================== */
+/* ==================== 改名（健壮版） ==================== */
 let renamingFile = null;
 
-function openRenameModal(name, sha) {
-  renamingFile = { name, sha };
+function openRenameModal(name) {
+  renamingFile = { name };
   const input = $('renameInput');
   input.value = name;
   $('renameModal').classList.add('show');
   document.body.style.overflow = 'hidden';
   setTimeout(() => {
     input.focus();
-    // 选中文件名主体（不选后缀），方便直接输入新名字
     const ext = (name.match(/\.\w+$/) || [''])[0];
     input.setSelectionRange(0, name.length - ext.length);
   }, 100);
 }
-
 function closeRenameModal() {
   $('renameModal').classList.remove('show');
   document.body.style.overflow = '';
   renamingFile = null;
 }
-
 $('renameCancelBtn').onclick = closeRenameModal;
 
 $('renameConfirmBtn').onclick = async () => {
   if (!renamingFile) return;
-  const { name: oldName, sha: oldSha } = renamingFile;
+  const oldName = renamingFile.name;
   const newName = $('renameInput').value.trim();
 
   if (!newName) return toast('请输入新文件名', 'error');
   if (newName === oldName) { closeRenameModal(); return; }
   if (existingNames.has(newName)) return toast('新名字已存在，请换一个', 'error');
 
-  // 后缀检查
   const oldExt = (oldName.match(/\.\w+$/) || [''])[0].toLowerCase();
   const newExt = (newName.match(/\.\w+$/) || [''])[0].toLowerCase();
   if (oldExt !== newExt) {
     if (!confirm(`⚠️ 后缀将从「${oldExt || '无'}」改为「${newExt || '无'}」，可能影响显示，确定继续？`)) return;
   }
 
-  $('renameConfirmBtn').disabled = true;
+  const btn = $('renameConfirmBtn');
+  btn.disabled = true;
+  btn.textContent = '处理中…';
   toast('正在重命名…');
 
+  let step = '① 读取原文件信息';
   try {
-    // 1. 获取原文件内容（base64）
-    const res = await fetch(API_BASE + encodeURIComponent(oldName) + `?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: getHeaders() });
-    if (!res.ok) throw new Error('读取原文件失败');
-    const data = await res.json();
+    // Step 1: 重新读取原文件最新信息
+    const infoRes = await fetch(
+      API_BASE + encodeURIComponent(oldName) + `?ref=${CONFIG.branch}&t=${Date.now()}`,
+      { headers: getHeaders() }
+    );
+    if (!infoRes.ok) {
+      const e = await infoRes.json().catch(() => ({}));
+      throw new Error(`HTTP ${infoRes.status} ${e.message || ''}`);
+    }
+    const info = await infoRes.json();
+    const latestSha = info.sha;
+    if (!latestSha) throw new Error('未获取到 sha');
 
+    // Step 2: 获取文件内容
+    step = '② 读取文件内容';
     let base64Content = '';
-    if (data.content && data.encoding === 'base64') {
-      base64Content = data.content.replace(/\s/g, '');
-    } else if (data.download_url) {
-      // 大文件兜底：通过 download_url 下载
-      const rawRes = await fetch(data.download_url + `?t=${Date.now()}`, { headers: getHeaders() });
-      if (!rawRes.ok) throw new Error('下载原文件失败');
+    if (info.content && info.encoding === 'base64' && info.content.trim()) {
+      base64Content = info.content.replace(/\s/g, '');
+    } else if (info.sha) {
+      // 大文件走 git/blobs API（不受 1MB 限制，无跨域问题）
+      const blobRes = await fetch(`${API_GIT}/blobs/${info.sha}`, { headers: getHeaders() });
+      if (!blobRes.ok) throw new Error(`blob HTTP ${blobRes.status}`);
+      const blob = await blobRes.json();
+      base64Content = (blob.content || '').replace(/\s/g, '');
+    } else if (info.download_url) {
+      // 兜底：raw 公开下载（不带 Token，避免 CORS）
+      const rawRes = await fetch(info.download_url + `?t=${Date.now()}`);
+      if (!rawRes.ok) throw new Error(`raw HTTP ${rawRes.status}`);
       const buf = await rawRes.arrayBuffer();
       base64Content = arrayBufferToBase64(buf);
-    } else {
-      throw new Error('无法读取文件内容');
     }
+    if (!base64Content) throw new Error('文件内容为空');
 
-    // 2. 上传新文件
-    const resPut = await fetch(API_BASE + encodeURIComponent(newName), {
+    // Step 3: 上传新文件
+    step = '③ 上传新文件';
+    const putRes = await fetch(API_BASE + encodeURIComponent(newName), {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify({
@@ -1414,40 +1341,49 @@ $('renameConfirmBtn').onclick = async () => {
         branch: CONFIG.branch
       })
     });
-    if (!resPut.ok) {
-      const err = await resPut.json().catch(() => ({}));
-      throw new Error(err.message || '上传新文件失败');
+    if (!putRes.ok) {
+      const e = await putRes.json().catch(() => ({}));
+      throw new Error(`HTTP ${putRes.status} ${e.message || ''}`);
     }
 
-    // 3. 删除旧文件
-    const resDel = await fetch(API_BASE + encodeURIComponent(oldName), {
+    // Step 4: 删除旧文件
+    step = '④ 删除旧文件';
+    const delRes = await fetch(API_BASE + encodeURIComponent(oldName), {
       method: 'DELETE',
       headers: getHeaders(),
       body: JSON.stringify({
         message: `rename: remove ${oldName}`,
-        sha: oldSha,
+        sha: latestSha,
         branch: CONFIG.branch
       })
     });
-    if (!resDel.ok) throw new Error('旧文件删除失败，请手动检查');
+    if (!delRes.ok) {
+      const e = await delRes.json().catch(() => ({}));
+      throw new Error(`HTTP ${delRes.status} ${e.message || ''}（新文件已上传成功，旧文件可手动删除）`);
+    }
 
-    // 4. ⭐ 迁移时间记录（保持原上传时间）
+    // Step 5: 迁移时间
+    step = '⑤ 迁移时间记录';
     try {
       const { data: dates, sha: dsha } = await loadDatesJson();
-      const oldTime = dates[oldName] || globalFileDates[oldName];
+      const oldTime = dates[oldName] || globalFileDates[oldName] || new Date().toISOString();
       delete dates[oldName];
-      dates[newName] = oldTime || new Date().toISOString();
+      dates[newName] = oldTime;
       await saveDatesJson(dates, dsha);
-    } catch (e) { console.error('迁移时间记录失败', e); }
+    } catch (e) {
+      console.error('迁移时间记录失败', e);
+    }
 
     toast(`已重命名为「${newName}」✓`, 'success');
     closeRenameModal();
     await loadGallery();
 
   } catch (e) {
-    toast('重命名失败：' + e.message, 'error');
+    toast(`重命名失败（${step}）：${e.message}`, 'error');
+    console.error('重命名失败:', e);
   } finally {
-    $('renameConfirmBtn').disabled = false;
+    btn.disabled = false;
+    btn.textContent = '确认改名';
   }
 };
 
@@ -1468,23 +1404,17 @@ $('fillDatesBtn').onclick = async () => {
     for (let i = 0; i < missing.length; i++) {
       const name = missing[i];
       btn.textContent = `补全中… ${i + 1}/${missing.length}`;
-
       try {
-        // 查这个文件的最新提交记录
         const res = await fetch(
           `${API_COMMITS}?path=${encodeURIComponent(name)}&sha=${CONFIG.branch}&per_page=1&t=${Date.now()}`,
           { headers: getHeaders() }
         );
         if (res.ok) {
           const arr = await res.json();
-          if (arr.length > 0) {
-            data[name] = arr[0].commit.author.date;
-            ok++;
-          } else fail++;
+          if (arr.length > 0) { data[name] = arr[0].commit.author.date; ok++; }
+          else fail++;
         } else fail++;
       } catch (e) { fail++; }
-
-      // 每 5 个暂停一下，避免触发 GitHub 限速
       if (i % 5 === 4) await new Promise(r => setTimeout(r, 500));
     }
 
@@ -1512,7 +1442,6 @@ $('refreshBtn').onclick = () => {
   $('dateFilter').value = '';
   currentFilterDate = '';
   $('clearDateBtn').style.display = 'none';
-
   loadGallery();
   toast('正在刷新…');
 };
@@ -1522,7 +1451,6 @@ $('refreshBtn').onclick = () => {
   const saved = getToken();
   if (saved) $('tokenInput').value = saved;
   loadGallery();
-
   window.addEventListener('resize', () => {
     if (cropModal.classList.contains('show')) closeCropper();
   });
